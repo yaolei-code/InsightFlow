@@ -228,3 +228,42 @@ class DiscoveryRun(Record,Base):
     result: Mapped[dict] = mapped_column(JSON,default=dict)
     error: Mapped[str | None]
     finished_at: Mapped[str | None]
+
+class UserFollow(Record,Base):
+    __tablename__='user_follows'
+    __table_args__=(UniqueConstraint('user_id','target_type','target_key'),)
+    user_id: Mapped[str] = mapped_column(default='local')
+    target_type: Mapped[str]
+    target_key: Mapped[str]
+
+class EventCluster(Record,Base):
+    __tablename__='event_clusters'
+    fingerprint: Mapped[str] = mapped_column(unique=True)
+    method: Mapped[str]
+    reason: Mapped[str]
+
+class ClusterMember(Base):
+    __tablename__='cluster_members'
+    event_id: Mapped[int] = mapped_column(ForeignKey('progress_events.id'),primary_key=True)
+    cluster_id: Mapped[int] = mapped_column(ForeignKey('event_clusters.id'),index=True)
+
+class EventAssessment(Base):
+    __tablename__='event_assessments'
+    event_id: Mapped[int] = mapped_column(ForeignKey('progress_events.id'),primary_key=True)
+    score: Mapped[int]
+    factors: Mapped[dict] = mapped_column(JSON)
+    review_status: Mapped[str] = mapped_column(default='pending')
+    reviewed_at: Mapped[str | None]
+    updated_at: Mapped[str] = mapped_column(default=utcnow)
+
+class ResearchSession(Record,Base):
+    __tablename__='research_sessions'
+    user_query: Mapped[str] = mapped_column(Text)
+    parameters: Mapped[dict] = mapped_column(JSON)
+    status: Mapped[str] = mapped_column(default='queued',index=True)
+    trace: Mapped[list] = mapped_column(JSON,default=list)
+    summary: Mapped[str] = mapped_column(Text,default='')
+    report_id: Mapped[int | None] = mapped_column(ForeignKey('research_reports.id'))
+    usage: Mapped[dict] = mapped_column(JSON,default=dict)
+    stop_reason: Mapped[str | None]
+    finished_at: Mapped[str | None]

@@ -1,0 +1,9 @@
+<script setup lang="ts">
+import {ref,watch} from 'vue'
+import {get,api} from '../api'
+const props=defineProps<{id:number|null}>(),emit=defineEmits(['close'])
+const event=ref<any>(null),loading=ref(false)
+watch(()=>props.id,async id=>{event.value=null;if(id){loading.value=true;try{event.value=await get('/workspace/events/'+id)}finally{loading.value=false}}},{immediate:true})
+async function review(status:string){await api.patch('/workspace/events/'+props.id+'/review',{status});event.value=await get('/workspace/events/'+props.id)}
+</script>
+<template><el-drawer :model-value="!!id" @close="emit('close')" title="事件详情与多来源证据" size="min(800px,95vw)"><div v-loading="loading" v-if="event"><h2>{{event.company_name}} · {{event.title}}</h2><p>{{event.description}}</p><p>发生：{{event.occurred_at||'未知'}} · 发布：{{event.published_at||'未知'}}</p><p>阶段：{{event.progress_stage}} · 重要性 {{event.importance}} · 审阅 {{event.review_status}}</p><p>关联原始记录 {{event.member_ids.length}} 条；证据等级：{{event.evidence_levels.join(' / ')}}</p><el-collapse><el-collapse-item title="重要性依据（与可信度分开）"><pre>{{JSON.stringify(event.importance_factors,null,2)}}</pre></el-collapse-item></el-collapse><h3>尚未确认</h3><p v-for="u in event.uncertainties" :key="u">{{u}}</p><div v-for="e in event.evidence" :key="e.id" class="claim"><a :href="e.source_url" target="_blank" rel="noopener noreferrer">{{e.source_url}}</a><p>{{e.evidence_level}} · {{e.source_type}} · {{e.verification_status}}</p><p>资料发布时间 {{e.published_at||'未知'}} · 采集 {{e.collected_at}} · Snapshot #{{e.snapshot_id}}</p><blockquote>{{e.evidence_text}}</blockquote></div><p>审阅标记不阻塞存储，也不会自动提升证据等级。</p><el-button @click="review('reviewed')">标记已审阅</el-button><el-button @click="review('questionable')">标记存疑</el-button><el-button @click="review('pending')">保留待审阅</el-button></div></el-drawer></template>

@@ -19,6 +19,8 @@ workers = set()
 @asynccontextmanager
 async def lifespan(app):
     with Session() as db:
+        for session in db.scalars(select(m.ResearchSession).where(m.ResearchSession.status.in_(['queued','running']))):
+            session.status='interrupted';session.stop_reason='进程重启中断';session.finished_at=utcnow()
         for candidate in db.scalars(select(m.SourceCandidate).where(m.SourceCandidate.processing_status=='processing')):
             candidate.processing_status='failed';candidate.processing_error='进程重启中断处理，可重试'
         for run in db.scalars(select(m.DiscoveryRun).where(m.DiscoveryRun.status.in_(['queued','running']))):
@@ -235,3 +237,5 @@ from .company_api import router as company_router
 app.include_router(company_router)
 from .discovery_api import router as discovery_router
 app.include_router(discovery_router)
+from .workspace_api import router as workspace_router
+app.include_router(workspace_router)
