@@ -92,8 +92,19 @@ class ResearchTask(Record, Base):
     progress: Mapped[int] = mapped_column(default=0)
     logs: Mapped[list] = mapped_column(JSON, default=list)
     source_ids: Mapped[list] = mapped_column(JSON)
+    snapshot_ids: Mapped[list] = mapped_column(JSON, default=list)
     finished_at: Mapped[str | None]
     usage: Mapped[dict] = mapped_column(JSON, default=dict)
+
+
+class ExtractionRun(Record, Base):
+    __tablename__ = 'extraction_runs'
+    snapshot_id: Mapped[int] = mapped_column(ForeignKey('snapshots.id'), unique=True)
+    status: Mapped[str]
+    error: Mapped[str | None]
+    counts: Mapped[dict] = mapped_column(JSON, default=dict)
+    usage: Mapped[dict] = mapped_column(JSON, default=dict)
+    finished_at: Mapped[str | None]
 
 
 class Comparison(Record, Base):

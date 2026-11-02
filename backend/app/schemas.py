@@ -37,7 +37,7 @@ class ClaimOutput(Strict):
     claim_text: str = Field(max_length=2000)
     claim_status: Literal['supported','not_supported','unknown','not_applicable']
     availability: Literal['released','demo','planned','in_development','unknown']
-    evidence_text: str = Field(min_length=1, max_length=4000)
+    evidence_text: str = Field(max_length=4000)
 
 class Extraction(Strict):
     claims: list[ClaimOutput] = Field(max_length=32)

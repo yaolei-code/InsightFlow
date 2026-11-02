@@ -13,6 +13,8 @@
 | /api/sources/{id}/fetch | POST | 单来源异步研究，202 |
 | /api/sources/{id}/snapshots | GET | 历史快照 |
 | /api/snapshots/{id} | GET | 原始保存正文 |
+| /api/snapshots/{id}/extract | POST | 从已保存的快照异步提取 Claim，返回研究任务，202 |
+| /api/snapshots/{id}/extraction | GET | 提取运行状态、安全错误、统计及用量 |
 | /api/claims | GET | Claim 与证据引用（包含历史） |
 | /api/changes | GET | 真实版本变化 |
 | /api/impacts | GET | 已保存影响分析 |

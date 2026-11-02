@@ -4,6 +4,8 @@ AI-Powered Competitive Intelligence & Product Change Analysis Platform
 
 基于 AI Agent 的竞品情报监测与产品影响分析平台。**Evidence First, Analysis Second.**
 
+第二阶段已接通 DeepSeek Flash 的真实快照提取：Sinfra 实测 16 条 Claim，11 条验证通过，5 条未知/待核验；43 项离线测试通过。配置、审计、限制及验收见 [第二阶段记录](docs/stage2.md)。
+
 面向具身智能研发基础设施研究，初始对象为 Simate Sinfra、FluxVLA Engine、NVIDIA Isaac。产品不是完全等价的竞争对手，平台保留人工审阅的竞争关系，明确区分已发布、演示、计划、开发中和未知能力。
 
 ## 技术架构
@@ -54,7 +56,7 @@ npm run dev
 
 ## 环境变量
 
-根目录 `.env` 从 backend 工作目录读取（运行后端命令请进入 backend）。环境变量优先。
+根目录 `.env` 通过项目绝对路径定位，环境变量优先。后端仍建议在 backend 工作目录启动，保持相对数据库路径一致。
 
 | 变量 | 用途 |
 | --- | --- |

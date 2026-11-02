@@ -23,6 +23,10 @@ async def lifespan(app):
             task.status='interrupted'
             task.finished_at=utcnow()
             task.logs=[*task.logs,{'message':'进程重启中断；请重新提交任务'}]
+        for run in db.scalars(select(m.ExtractionRun).where(m.ExtractionRun.status=='running')):
+            run.status='failed'
+            run.error='进程重启中断提取；请重新提交'
+            run.finished_at=utcnow()
         db.commit()
     yield
     for worker in workers:
@@ -125,7 +129,7 @@ def patch_source(id:int,body:s.SourcePatch,db:DBSession=DB):
     db.commit()
     return asdict(row)
 
-def enqueue(ids,db):
+def enqueue(ids,db,snapshot_ids=None):
     if db.scalar(select(m.ResearchTask).where(m.ResearchTask.status.in_(['queued','running']))):
         raise HTTPException(409,'已有研究任务执行中')
     sources=db.scalars(select(m.Source).where(m.Source.is_active==True)).all()
@@ -133,7 +137,7 @@ def enqueue(ids,db):
     ids=list(dict.fromkeys(ids or sorted(active)))
     if not ids or not set(ids)<=active:
         raise HTTPException(400,'请选择有效且启用的数据源')
-    task=m.ResearchTask(source_ids=ids)
+    task=m.ResearchTask(source_ids=ids,snapshot_ids=snapshot_ids or [])
     db.add(task); db.commit()
     worker=asyncio.create_task(run_task(task.id)); workers.add(worker)
     worker.add_done_callback(workers.discard)
@@ -156,6 +160,19 @@ def snapshots(id:int,offset:int=Query(0,ge=0),limit:int=Query(20,ge=1,le=100),db
 @app.get('/api/snapshots/{id}')
 def snapshot(id:int,db:DBSession=DB):
     return asdict(require(db,m.Snapshot,id))
+
+@app.post('/api/snapshots/{id}/extract',status_code=202)
+async def extract_snapshot(id:int,db:DBSession=DB):
+    snapshot=require(db,m.Snapshot,id)
+    if not settings.openai_api_key:
+        raise HTTPException(409,'未配置模型，请在本地 .env 配置 API Key')
+    return enqueue([snapshot.source_id],db,[id])
+
+@app.get('/api/snapshots/{id}/extraction')
+def extraction_status(id:int,db:DBSession=DB):
+    require(db,m.Snapshot,id)
+    run=db.scalar(select(m.ExtractionRun).where(m.ExtractionRun.snapshot_id==id))
+    return asdict(run) if run else {'snapshot_id':id,'status':'not_started'}
 
 @app.get('/api/claims')
 def claims(product_id:int|None=None,offset:int=Query(0,ge=0),limit:int=Query(50,ge=1,le=200),db:DBSession=DB):
@@ -186,7 +203,7 @@ def comparison(body:s.ComparisonInput,db:DBSession=DB):
 
 @app.get('/api/comparisons')
 def comparisons(db:DBSession=DB):
-    claims=current_verified_claims(db)
+    claims=current_verified_claims(db,include_review=True)
     return {'saved':page(db,m.Comparison),'dimensions':s.DIMENSIONS,'claims':[asdict(c) for c in claims]}
 
 @app.post('/api/reports',status_code=201)

@@ -1,0 +1,20 @@
+{
+  "executed_at": "2026-11-02T12:01:25.701385+00:00",
+  "model": "deepseek-flash",
+  "protocol": "json",
+  "mock": false,
+  "snapshot_id": 1,
+  "source_url": "https://mate-robot.cn/research/sinfra/",
+  "status": "completed",
+  "counts": {
+    "total": 16,
+    "verified": 11,
+    "unknown": 5,
+    "conflicting": 0,
+    "unverified": 5
+  },
+  "usage": {
+    "requests": 1,
+    "total_tokens": 4212
+  }
+}

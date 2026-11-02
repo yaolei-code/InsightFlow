@@ -6,6 +6,7 @@ from sqlalchemy import select
 from . import models as m, ai
 from .db import Session, utcnow
 from .collector import fetch_webpage, fetch_github_repo, normalize_content, content_hash
+from .extraction import extract_saved_snapshot
 
 log = logging.getLogger(__name__)
 execution_lock = asyncio.Lock()
@@ -55,12 +56,7 @@ async def process_source(db, source, usage):
         return note + '；未配置模型，AI 分析未执行'
     if not previous and snapshot.sequence > 1:
         previous = db.scalar(select(m.Snapshot).where(m.Snapshot.source_id==source.id,m.Snapshot.sequence==snapshot.sequence-1))
-    claims = db.scalars(select(m.Claim).where(m.Claim.snapshot_id==snapshot.id)).all()
-    if not claims:
-        extracted = await ai.extract_claims(snapshot,usage)
-        for claim in extracted.claims:
-            db.add(m.Claim(product_id=source.product_id,snapshot_id=snapshot.id, source_url=url, **claim.model_dump(), verification_status='verified' if ai.verify_claim(claim,snapshot) else 'unverified'))
-        db.commit()
+    await extract_saved_snapshot(db,snapshot.id,usage)
     if previous and not db.scalar(select(m.ChangeEvent).where(m.ChangeEvent.new_snapshot_id==snapshot.id)):
         diff = meaningful_diff(previous.content,snapshot.content)
         if diff:
@@ -84,13 +80,15 @@ async def process_source(db, source, usage):
                 db.commit()
     return note
 
-def current_verified_claims(db, product_ids=None):
+def current_verified_claims(db, product_ids=None, include_review=False):
     latest_ids = []
     for source in db.scalars(select(m.Source).where(m.Source.is_active==True)):
         snap = db.scalar(select(m.Snapshot).where(m.Snapshot.source_id==source.id).order_by(m.Snapshot.sequence.desc()))
         if snap:
             latest_ids.append(snap.id)
-    query = select(m.Claim).where(m.Claim.snapshot_id.in_(latest_ids),m.Claim.verification_status=='verified')
+    query = select(m.Claim).where(m.Claim.snapshot_id.in_(latest_ids))
+    if not include_review:
+        query=query.where(m.Claim.verification_status=='verified')
     if product_ids:
         query = query.where(m.Claim.product_id.in_(product_ids))
     return db.scalars(query).all()
@@ -104,18 +102,23 @@ async def run_task(task_id):
             db.commit()
             usage = {'requests':0,'total_tokens':0}
             errors = 0
-            for i, sid in enumerate(task.source_ids):
+            items=task.snapshot_ids or task.source_ids
+            for i, sid in enumerate(items):
                 try:
-                    source = db.get(m.Source,sid)
-                    message = await asyncio.wait_for(process_source(db,source,usage),timeout=300)
-                    errors += int(source.last_status=='error')
+                    if task.snapshot_ids:
+                        result=await asyncio.wait_for(extract_saved_snapshot(db,sid,usage),timeout=180)
+                        message='快照提取完成：'+str(result)
+                    else:
+                        source = db.get(m.Source,sid)
+                        message = await asyncio.wait_for(process_source(db,source,usage),timeout=300)
+                        errors += int(source.last_status=='error')
                 except Exception as exc:
                     db.rollback()
-                    log.exception('Research source failed')
-                    message = '研究阶段失败：'+type(exc).__name__
+                    message = ai.safe_error(exc)
+                    log.warning('Research stage failed: %s',message)
                     errors += 1
-                task.logs = [*task.logs, {'source_id':sid,'message':message,'time':utcnow()}]
-                task.progress = int((i+1)/len(task.source_ids)*100)
+                task.logs = [*task.logs, {('snapshot_id' if task.snapshot_ids else 'source_id'):sid,'message':message,'time':utcnow()}]
+                task.progress = int((i+1)/len(items)*100)
                 db.commit()
             usage['elapsed_seconds'] = round(time.monotonic()-start,3)
             task.usage=usage
