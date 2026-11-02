@@ -1,5 +1,7 @@
 # InsightFlow
 
+积压全量处理已完成：443条候选中194完成、211跳过、38失败，未处理为0。行业地图现有398条来源事件记录、119个非空单元格；产品矩阵57条Claim中35条原文验证通过。记录数不代表去重新闻或独立能力数。[全量处理及矩阵修复](docs/backlog-and-matrix-fixes.md)。
+
 **最新交互调整：无需人工审核。** 发现后自动采集正文、识别企业并提取带证据事件；现有积压可在 `/coverage` 一键处理10篇。人工登记仅作为可选操作。规则和实际结果见 [自动入库说明](docs/automatic-ingestion.md)。
 
 最新 Milestone：**Industry Intelligence Coverage Expansion**。新增 `/coverage` 来源发现工作台，真实 Tavily / GitHub 搜索、16 个行业与企业入口、栏目 / sitemap 发现、公司别名和人工候选审核。实测 443 条待审核候选；正式进展仍为 4 条，未把搜索摘要当事实。实现与真实限制见 [覆盖扩展说明](docs/coverage-expansion.md)。

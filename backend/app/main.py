@@ -211,7 +211,12 @@ def comparison(body:s.ComparisonInput,db:DBSession=DB):
 @app.get('/api/comparisons')
 def comparisons(db:DBSession=DB):
     claims=current_verified_claims(db,include_review=True)
-    return {'saved':page(db,m.Comparison),'dimensions':s.DIMENSIONS,'claims':[asdict(c) for c in claims]}
+    pending=set()
+    for source in db.scalars(select(m.Source).where(m.Source.product_id!=None,m.Source.is_active==True)):
+        latest=db.scalar(select(m.Snapshot).where(m.Snapshot.source_id==source.id).order_by(m.Snapshot.sequence.desc()))
+        if latest and not db.scalar(select(m.ExtractionRun).where(m.ExtractionRun.snapshot_id==latest.id,m.ExtractionRun.status=='completed')):
+            pending.add(source.product_id)
+    return {'saved':page(db,m.Comparison),'dimensions':s.DIMENSIONS,'claims':[asdict(c) for c in claims],'extraction_pending_products':sorted(pending)}
 
 @app.post('/api/reports',status_code=201)
 def report(body:s.ReportInput,db:DBSession=DB):

@@ -118,3 +118,14 @@ async def test_duplicate_candidates(db,monkeypatch):
     snap=snapshot(db)
     monkeypatch.setattr(ai,'extract_claims',AsyncMock(return_value=Extraction(claims=[output(),output()])))
     assert (await extract_saved_snapshot(db,snap.id,{}))['total']==8
+
+async def test_explicit_refresh_rechecks_existing_claim(db,monkeypatch):
+    snap=snapshot(db)
+    initial=output().model_copy(update={'claim_status':'unknown'})
+    monkeypatch.setattr(ai,'extract_claims',AsyncMock(return_value=Extraction(claims=[initial])))
+    await extract_saved_snapshot(db,snap.id,{})
+    before=db.scalar(select(m.Claim).where(m.Claim.dimension=='Simulation')).id
+    monkeypatch.setattr(ai,'extract_claims',AsyncMock(return_value=Extraction(claims=[output()])))
+    await extract_saved_snapshot(db,snap.id,{},refresh=True)
+    row=db.get(m.Claim,before)
+    assert row.claim_status=='supported' and row.verification_status=='verified'

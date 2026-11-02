@@ -71,6 +71,9 @@ async def ingest_candidate(db,row,usage):
         source.last_status='success';source.error=None;source.last_fetched_at=utcnow()
         snapshot,_,_=create_snapshot(db,source,content,final)
         result=await extract_progress(db,snapshot.id,usage)
+        if source.product_id:
+            from .extraction import extract_saved_snapshot
+            result['product_claims']=await extract_saved_snapshot(db,snapshot.id,usage)
         row.processing_status='completed';row.processing_error=None;db.commit()
         return {'candidate_id':row.id,'company_id':company_id,'status':'completed','snapshot_id':snapshot.id,**result}
     except Exception as exc:

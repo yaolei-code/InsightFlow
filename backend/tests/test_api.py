@@ -19,3 +19,14 @@ def test_api_crud(db):
         assert client.delete(f'/api/products/{pid}').status_code==200
         assert client.get('/openapi.json').status_code==200
     finally: app.dependency_overrides.clear()
+
+def test_comparison_distinguishes_unanalyzed_snapshot(db):
+    from app.research import create_snapshot
+    from app.models import Source
+    source=db.get(Source,1)
+    create_snapshot(db,source,'Training is publicly documented.',source.url)
+    app.dependency_overrides[get_db]=lambda:db
+    try:
+        result=TestClient(app).get('/api/comparisons').json()
+        assert result['claims']==[] and result['extraction_pending_products']==[1]
+    finally:app.dependency_overrides.clear()

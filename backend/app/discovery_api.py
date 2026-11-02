@@ -68,7 +68,8 @@ def submit(db,kind,parameters):
 @router.get('/coverage')
 def coverage(db:Session=DB):
     counts={name:db.scalar(select(func.count()).select_from(model)) for name,model in [('seeds',m.DiscoverySeed),('candidates',m.SourceCandidate),('sources',m.Source),('snapshots',m.Snapshot),('events',m.ProgressEvent)]}
-    return {**counts,'pending':db.scalar(select(func.count()).select_from(m.SourceCandidate).where(m.SourceCandidate.review_status=='pending')),'tavily_configured':bool(settings.tavily_api_key),'keywords':KEYWORDS,'warning':'此处统计仅代表已发现及已采集资料，不代表行业全貌。'}
+    processing=dict(db.execute(select(m.SourceCandidate.processing_status,func.count()).group_by(m.SourceCandidate.processing_status)).all())
+    return {**counts,'processing_counts':processing,'unprocessed':processing.get('not_started',0),'pending':db.scalar(select(func.count()).select_from(m.SourceCandidate).where(m.SourceCandidate.review_status=='pending')),'tavily_configured':bool(settings.tavily_api_key),'keywords':KEYWORDS,'warning':'此处统计仅代表已发现及已采集资料，不代表行业全貌。'}
 
 @router.get('/discovery-seeds')
 def seeds(db:Session=DB):return [asdict(x) for x in db.scalars(select(m.DiscoverySeed).order_by(m.DiscoverySeed.id))]

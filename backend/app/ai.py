@@ -69,7 +69,10 @@ async def structured(schema, prompt, usage=None):
 def verify_claim(claim, snapshot):
     if not snapshot or not claim.evidence_text.strip() or claim.evidence_text not in snapshot.content:
         return False
-    qualifier = re.search(r'illustrative|demo|coming soon|in development|计划中|演示', snapshot.content, re.I)
+    position=snapshot.content.find(claim.evidence_text)
+    # Qualifications elsewhere on a long README must not invalidate unrelated features.
+    context=snapshot.content[max(0,position-180):position+len(claim.evidence_text)+180]
+    qualifier = re.search(r'illustrative|demo|coming soon|in development|计划中|演示', context, re.I)
     if qualifier and claim.availability == 'released':
         return False  # Conservative: a researcher must resolve page-wide qualification.
     if claim.claim_status == 'not_supported' and not re.search(r'not supported|does not support|unsupported|不支持', claim.evidence_text, re.I):

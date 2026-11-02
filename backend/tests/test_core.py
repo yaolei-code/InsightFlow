@@ -52,6 +52,11 @@ def test_demo_not_released():
     assert ai.verify_claim(c,snap)
     assert not ai.verify_claim(c.model_copy(update={'availability':'released'}),snap)
 
+def test_unrelated_demo_does_not_invalidate_feature():
+    c=claim().model_copy(update={'claim_text':'Training enabled','evidence_text':'Training is supported.','availability':'released'})
+    snap=SimpleNamespace(content='DEMO video\n'+('unrelated material '*40)+'\nTraining is supported.')
+    assert ai.verify_claim(c,snap)
+
 def test_missing_evidence():
     assert not ai.verify_claim(claim(),SimpleNamespace(content='Training only'))
 
