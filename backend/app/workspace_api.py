@@ -115,7 +115,7 @@ async def run_research(id):
                     try:
                         result=await discover_search(db,SearchInput(query=decision.search_query,keywords=[],company_id=params.get('company_id'),start_date=today-timedelta(days=max(params['days']-1,0)) if params['days'] else None,end_date=today if params['days'] else None))
                         trace('search_web',json.dumps(result,ensure_ascii=False))
-                        candidates=db.scalars(select(m.SourceCandidate).where(m.SourceCandidate.id>before).order_by(m.SourceCandidate.relevance_score.desc())).all()
+                        candidates=db.scalars(select(m.SourceCandidate).where(m.SourceCandidate.id.in_(result.get('candidate_ids',[]))).order_by(m.SourceCandidate.relevance_score.desc())).all()
                         for candidate in [c for c in candidates if article_link(c)][:3]:
                             result=await asyncio.wait_for(ingest_candidate(db,candidate,usage),timeout=100)
                             trace('fetch_extract_verify',json.dumps(result,ensure_ascii=False))
@@ -124,12 +124,18 @@ async def run_research(id):
                 quality(db)
                 rows=records(db,params['days'],params.get('company_id'),params.get('technology'))
                 if scope.company_ids and not params.get('company_id'):rows=[r for r in rows if r['company_id'] in scope.company_ids]
-                saved=report(db,session.user_query,rows,'用户范围：'+json.dumps(params,ensure_ascii=False),decision.gaps)
+                saved=report(db,session.user_query,rows,'用户范围：'+json.dumps({**params,'derived_company_ids':scope.company_ids},ensure_ascii=False),decision.gaps)
                 session.report_id=saved.id;session.summary=f'已汇编{len(rows)}个事件组；结论仅限已保存证据。';session.stop_reason='完成受控数据库优先研究；最多一次搜索、三篇正文补充。';session.status='completed'
                 trace('create_research_report',f'报告 #{saved.id}；{len(rows)}个事件组。')
             except Exception as exc:
                 db.rollback();session=db.get(m.ResearchSession,id);session.status='failed';session.stop_reason=ai.safe_error(exc)
             session.usage=usage;session.finished_at=utcnow();db.commit()
+
+async def bounded_research(id):
+    try:await asyncio.wait_for(run_research(id),timeout=300)
+    except asyncio.TimeoutError:
+        with DBSession() as db:
+            row=db.get(m.ResearchSession,id);row.status='failed';row.stop_reason='等待或执行超过300秒预算，请重试';row.finished_at=utcnow();db.commit()
 
 @router.post('/research',status_code=202)
 async def research(body:ResearchInput,db:Session=DB):
@@ -138,7 +144,7 @@ async def research(body:ResearchInput,db:Session=DB):
     if db.scalar(select(m.ResearchSession).where(m.ResearchSession.status.in_(['queued','running']))):raise HTTPException(409,'已有首页研究执行中')
     from .main import workers
     row=m.ResearchSession(user_query=body.query,parameters=body.model_dump(exclude={'query'}));db.add(row);db.commit()
-    task=asyncio.create_task(run_research(row.id));workers.add(task);task.add_done_callback(workers.discard);return asdict(row)
+    task=asyncio.create_task(bounded_research(row.id));workers.add(task);task.add_done_callback(workers.discard);return asdict(row)
 
 @router.get('/research')
 def sessions(db:Session=DB):return [asdict(s) for s in db.scalars(select(m.ResearchSession).order_by(m.ResearchSession.id.desc()).limit(20))]

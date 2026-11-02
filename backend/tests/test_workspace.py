@@ -29,6 +29,14 @@ def test_similar_different_models_not_merged(db):
     event(db);event(db,title='Model Beta released',suffix='b')
     quality(db);assert len(records(db))==2
 
+def test_semantic_membership_survives_score_recompute(db):
+    a=event(db);b=event(db,title='Model Alpha announced',suffix='b');quality(db)
+    left=db.get(m.ClusterMember,a.id);right=db.get(m.ClusterMember,b.id)
+    cluster=db.get(m.EventCluster,left.cluster_id);cluster.method='rule_recall+llm'
+    right.cluster_id=left.cluster_id;db.commit()
+    quality(db)
+    assert len(records(db))==1 and len(db.scalars(select(m.ClusterMember)).all())==2
+
 def test_same_title_different_date_not_merged(db):
     event(db,date='2026-01-01');event(db,date='2026-02-01',suffix='b')
     quality(db);assert len(records(db))==2
@@ -81,6 +89,35 @@ async def test_real_task_flow_mock_model_offline(db,monkeypatch):
     await w.run_research(row.id)
     saved=db.get(m.ResearchSession,row.id)
     assert saved.status=='completed' and saved.report_id and len(saved.trace)>=3
+
+async def test_insufficient_evidence_calls_real_tool_adapter_mocked(db,monkeypatch):
+    from app import discovery
+    row=m.ResearchSession(user_query='Latest VLA updates',parameters={'days':30,'company_id':None,'technology':'VLA','allow_search':True});db.add(row);db.commit()
+    monkeypatch.setattr(w,'DBSession',lambda:db)
+    monkeypatch.setattr(ai,'structured',AsyncMock(side_effect=[w.Scope(company_ids=[],technology='VLA'),w.Decision(sufficient=False,plan_summary='Need fresh sources',search_query='VLA robot news',gaps=['No current evidence'])]))
+    search=AsyncMock(return_value={'candidate_ids':[],'results':0})
+    monkeypatch.setattr(discovery,'discover_search',search)
+    await w.run_research(row.id)
+    search.assert_awaited_once()
+    assert db.get(m.ResearchSession,row.id).status=='completed'
+    assert search.call_args.args[1].start_date is not None
+
+async def test_semantic_confirmation_and_numeric_conflict(db,monkeypatch):
+    from app.semantic_clusters import semantic_recompute,Results,Pair
+    a=event(db);b=event(db,title='Model Alpha announced',suffix='b')
+    response=Results(pairs=[Pair(first=a.id,second=b.id,same_progress=True,shared_anchor='Model Alpha',reason='Same specific model release')])
+    monkeypatch.setattr(ai,'structured',AsyncMock(return_value=response))
+    assert (await semantic_recompute(db))['merged']==1
+    assert len(records(db))==1
+    quality(db);assert len(records(db))==1
+
+async def test_semantic_conflicting_numbers_not_merged(db,monkeypatch):
+    from app.semantic_clusters import semantic_recompute,Results,Pair
+    a=event(db);b=event(db,title='Model Alpha announced',suffix='b')
+    a.metrics=[{'name':'accuracy','value':'90','unit':'%'}];b.metrics=[{'name':'accuracy','value':'95','unit':'%'}];db.commit()
+    monkeypatch.setattr(ai,'structured',AsyncMock(return_value=Results(pairs=[Pair(first=a.id,second=b.id,same_progress=True,shared_anchor='Model Alpha',reason='model thinks same')])) )
+    assert (await semantic_recompute(db))['merged']==0
+    assert len(records(db))==2 and all(e['review_status']=='questionable' for e in records(db))
 
 def test_review_does_not_change_evidence_level(db):
     e=event(db);quality(db);app.dependency_overrides[get_db]=lambda:db

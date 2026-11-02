@@ -126,14 +126,15 @@ async def discover_search(db,body):
     domains=body.domains or (['arxiv.org'] if body.kind=='papers' else None)
     if body.provider=='github' and body.kind!='github':raise ValueError('GitHub Provider 仅用于仓库搜索，不可替代新闻搜索')
     hits=await providers[body.provider].search(query,body.start_date,body.end_date,domains)
-    added=0
+    added=0;candidate_ids=[]
     for hit in hits:
         try:
-            _,created=save_candidate(db,hit,body.provider,query,body.company_id,source_type='industry_media' if body.kind in ('industry','company','technology') else 'other')
+            candidate,created=save_candidate(db,hit,body.provider,query,body.company_id,source_type='industry_media' if body.kind in ('industry','company','technology') else 'other')
+            candidate_ids.append(candidate.id)
             added+=int(created)
         except ValueError:continue
     db.commit()
-    return {'query':query,'results':len(hits),'candidates_added':added,'provider':body.provider,'date_filter':{'start':str(body.start_date) if body.start_date else None,'end':str(body.end_date) if body.end_date else None},'note':'日期来自搜索元数据，须以采集正文核验；GitHub 日期过滤是 pushed 时间。'}
+    return {'query':query,'results':len(hits),'candidates_added':added,'candidate_ids':candidate_ids,'provider':body.provider,'date_filter':{'start':str(body.start_date) if body.start_date else None,'end':str(body.end_date) if body.end_date else None},'note':'日期来自搜索元数据，须以采集正文核验；GitHub 日期过滤是 pushed 时间。'}
 
 lock=asyncio.Lock()
 
