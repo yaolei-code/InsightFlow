@@ -1,5 +1,7 @@
 # InsightFlow
 
+最新 Milestone：**Industry Intelligence Coverage Expansion**。新增 `/coverage` 来源发现工作台，真实 Tavily / GitHub 搜索、16 个行业与企业入口、栏目 / sitemap 发现、公司别名和人工候选审核。实测 443 条待审核候选；正式进展仍为 4 条，未把搜索摘要当事实。实现与真实限制见 [覆盖扩展说明](docs/coverage-expansion.md)。
+
 当前方向：**具身智能行业 Company Intelligence Platform**。新增企业档案、多源采集、多事件进展提取、企业时间线、行业技术地图和最近一周报告，保留全部产品研究功能。入口为 `/companies`；设计、迁移、实际验收与限制见 [企业情报阶段说明](docs/company-intelligence.md)。
 
 企业阶段实测：11 家企业、4 条带真实引文的事件；官网新闻/技术博客、GitHub、arXiv 均已保存真实快照。公众号适配已实现并离线测试，尚无真实公众号验收文章。前端生产构建通过。

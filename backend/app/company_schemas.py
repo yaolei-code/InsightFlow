@@ -3,7 +3,7 @@ from datetime import date
 from pydantic import Field
 from .schemas import Strict
 
-SourceType=Literal['official_website','company_news','wechat_official_account','github','arxiv','technical_blog','industry_media','press_release','customer_case','video','job_posting','other']
+SourceType=Literal['official_website','company_news','wechat_official_account','github','arxiv','technical_blog','industry_media','press_release','customer_case','customer_announcement','government','video','job_posting','other']
 Stage=Literal['research','prototype','demonstration','pilot','commercial_deployment','scaled_production','unknown']
 Level=Literal['company_claim','technical_artifact','independent_verification','customer_confirmation']
 

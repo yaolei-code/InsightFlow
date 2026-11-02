@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     github_token: str = ""
     wechat_search_api_url: str = ''
     wechat_search_api_key: str = ''
+    tavily_api_key: str = ''
+    search_provider: Literal['tavily','github'] = 'tavily'
 
 
 settings = Settings()

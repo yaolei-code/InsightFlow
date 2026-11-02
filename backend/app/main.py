@@ -19,6 +19,8 @@ workers = set()
 @asynccontextmanager
 async def lifespan(app):
     with Session() as db:
+        for run in db.scalars(select(m.DiscoveryRun).where(m.DiscoveryRun.status.in_(['queued','running']))):
+            run.status='interrupted';run.error='进程重启中断发现任务';run.finished_at=utcnow()
         for task in db.scalars(select(m.ResearchTask).where(m.ResearchTask.status.in_(['queued','running']))):
             task.status='interrupted'
             task.finished_at=utcnow()
@@ -224,3 +226,5 @@ def report_detail(id:int,db:DBSession=DB):
 
 from .company_api import router as company_router
 app.include_router(company_router)
+from .discovery_api import router as discovery_router
+app.include_router(discovery_router)

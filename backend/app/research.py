@@ -25,7 +25,10 @@ def create_snapshot(db, source, content, url):
     digest = content_hash(content)
     if latest and latest.content_hash == digest:
         return latest, None, False
-    row = m.Snapshot(source_id=source.id, sequence=latest.sequence+1 if latest else 1, content=content, content_hash=digest, source_url=url)
+    import re
+    title=next((line.removeprefix('Article title: ').removeprefix('# ').removeprefix('citation_title: ') for line in content.splitlines() if line.startswith(('Article title: ','# ','citation_title: '))),None)
+    published=re.search(r'^(?:Published|citation_date): (\d{4}[-/]\d{2}[-/]\d{2})',content,re.M)
+    row = m.Snapshot(source_id=source.id, sequence=latest.sequence+1 if latest else 1, content=content, content_hash=digest, source_url=url,title=title,published_at=published.group(1).replace('/','-') if published else None,source_type=source.source_type,capture_status='success')
     db.add(row)
     db.commit()
     return row, latest, True

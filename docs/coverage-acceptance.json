@@ -1,0 +1,232 @@
+{
+  "executed_at": "2026-11-02T12:45:57.317600+00:00",
+  "mock": false,
+  "seeds": [
+    {
+      "name": "机器人大讲堂",
+      "url": "https://www.leaderobot.com/",
+      "status": "partial",
+      "pages_read": 1,
+      "candidates_seen": 57,
+      "candidates_added": 41,
+      "errors": [
+        {
+          "url": "https://www.leaderobot.com/sitemap.xml",
+          "error": "HTTPStatusError"
+        }
+      ]
+    },
+    {
+      "name": "机器人新闻网",
+      "url": "https://www.robotnews.com.cn/",
+      "status": "partial",
+      "pages_read": 1,
+      "candidates_seen": 22,
+      "candidates_added": 17,
+      "errors": [
+        {
+          "url": "https://www.robotnews.com.cn/sitemap.xml",
+          "error": "HTTPStatusError"
+        }
+      ]
+    },
+    {
+      "name": "中国机器人产业发展联盟",
+      "url": "https://www.cdra.com.cn/news",
+      "status": "success",
+      "pages_read": 2,
+      "candidates_seen": 60,
+      "candidates_added": 59,
+      "errors": []
+    },
+    {
+      "name": "具身纪",
+      "url": "https://www.jushenji.com/",
+      "status": "success",
+      "pages_read": 2,
+      "candidates_seen": 28,
+      "candidates_added": 22,
+      "errors": []
+    },
+    {
+      "name": "具身之家",
+      "url": "https://www.jushenhome.com/",
+      "status": "success",
+      "pages_read": 4,
+      "candidates_seen": 60,
+      "candidates_added": 56,
+      "errors": []
+    },
+    {
+      "name": "Simate 官方入口",
+      "url": "https://mate-robot.cn/research/sinfra/",
+      "status": "partial",
+      "pages_read": 1,
+      "candidates_seen": 13,
+      "candidates_added": 8,
+      "errors": [
+        {
+          "url": "https://mate-robot.cn/sitemap.xml",
+          "error": "HTTP 404"
+        }
+      ]
+    },
+    {
+      "name": "NVIDIA 官方入口",
+      "url": "https://developer.nvidia.com/isaac",
+      "status": "partial",
+      "pages_read": 1,
+      "candidates_seen": 5,
+      "candidates_added": 5,
+      "errors": [
+        {
+          "url": "https://developer.nvidia.com/sitemap.xml",
+          "error": "HTTPStatusError"
+        }
+      ]
+    },
+    {
+      "name": "智元机器人 官方入口",
+      "url": "https://www.agibot.com/",
+      "status": "partial",
+      "pages_read": 1,
+      "candidates_seen": 25,
+      "candidates_added": 19,
+      "errors": [
+        {
+          "url": "https://www.agibot.com/sitemap.xml",
+          "error": "ParseError"
+        }
+      ]
+    },
+    {
+      "name": "北京人形机器人创新中心 官方入口",
+      "url": "https://www.x-humanoid.com/",
+      "status": "success",
+      "pages_read": 2,
+      "candidates_seen": 60,
+      "candidates_added": 27,
+      "errors": []
+    },
+    {
+      "name": "逐际动力 官方入口",
+      "url": "https://www.limxdynamics.com/",
+      "status": "success",
+      "pages_read": 2,
+      "candidates_seen": 60,
+      "candidates_added": 46,
+      "errors": []
+    },
+    {
+      "name": "银河通用 官方入口",
+      "url": "https://www.galbot.com/",
+      "status": "success",
+      "pages_read": 2,
+      "candidates_seen": 8,
+      "candidates_added": 5,
+      "errors": []
+    },
+    {
+      "name": "Physical Intelligence 官方入口",
+      "url": "https://www.pi.website/",
+      "status": "success",
+      "pages_read": 2,
+      "candidates_seen": 17,
+      "candidates_added": 17,
+      "errors": []
+    },
+    {
+      "name": "Figure AI 官方入口",
+      "url": "https://www.figure.ai/",
+      "status": "success",
+      "pages_read": 2,
+      "candidates_seen": 30,
+      "candidates_added": 26,
+      "errors": []
+    },
+    {
+      "name": "1X 官方入口",
+      "url": "https://www.1x.tech/",
+      "status": "partial",
+      "pages_read": 1,
+      "candidates_seen": 2,
+      "candidates_added": 2,
+      "errors": [
+        {
+          "url": "https://www.1x.tech/sitemap.xml",
+          "error": "HTTPStatusError"
+        }
+      ]
+    },
+    {
+      "name": "宇树科技 官方入口",
+      "url": "https://www.unitree.com/",
+      "status": "success",
+      "pages_read": 2,
+      "candidates_seen": 39,
+      "candidates_added": 33,
+      "errors": []
+    },
+    {
+      "name": "优必选 官方入口",
+      "url": "https://www.ubtrobot.com/",
+      "status": "success",
+      "pages_read": 2,
+      "candidates_seen": 52,
+      "candidates_added": 24,
+      "errors": []
+    }
+  ],
+  "searches": [
+    {
+      "query": "具身智能 工厂 客户试点 商业交付 机器人 商业部署",
+      "results": 10,
+      "candidates_added": 10,
+      "provider": "tavily",
+      "date_filter": {
+        "start": "2026-10-03",
+        "end": "2026-11-02"
+      },
+      "note": "日期来自搜索元数据，须以采集正文核验；GitHub 日期过滤是 pushed 时间。"
+    },
+    {
+      "query": "智元机器人 智元 AGIBOT 客户试点 机器人发布",
+      "results": 10,
+      "candidates_added": 10,
+      "provider": "tavily",
+      "date_filter": {
+        "start": "2026-10-03",
+        "end": "2026-11-02"
+      },
+      "note": "日期来自搜索元数据，须以采集正文核验；GitHub 日期过滤是 pushed 时间。"
+    },
+    {
+      "query": "VLA robot foundation model open source deployment",
+      "results": 10,
+      "candidates_added": 6,
+      "provider": "tavily",
+      "date_filter": {
+        "start": null,
+        "end": null
+      },
+      "note": "日期来自搜索元数据，须以采集正文核验；GitHub 日期过滤是 pushed 时间。"
+    },
+    {
+      "query": "unitree",
+      "results": 10,
+      "candidates_added": 10,
+      "provider": "github",
+      "date_filter": {
+        "start": null,
+        "end": null
+      },
+      "note": "日期来自搜索元数据，须以采集正文核验；GitHub 日期过滤是 pushed 时间。"
+    }
+  ],
+  "counts": {
+    "candidates": 443,
+    "sources": 16,
+    "snapshots": 7,
+    "events": 4
+  }
+}

@@ -78,12 +78,20 @@ def normalize_content(content):
 
 def extract_html(html):
     soup = BeautifulSoup(html, 'html.parser')
+    metadata=[]
+    title=soup.find('meta',attrs={'property':'og:title'})
+    if title and title.get('content'):metadata.append('Article title: '+title['content'].strip())
+    elif soup.title:metadata.append('Article title: '+soup.title.get_text(' ',strip=True))
+    for attrs in ({'property':'article:published_time'},{'name':'pubdate'},{'name':'publishdate'},{'name':'date'}):
+        node=soup.find('meta',attrs=attrs)
+        if node and node.get('content'):
+            metadata.append('Published: '+node['content'].strip());break
     for node in soup.select('script,style,nav,footer,header,aside,noscript,[role=navigation]'):
         node.decompose()
     root = soup.find(id='js_content') or soup.find('main') or soup.find('article') or soup.body or soup
     for h in root.find_all(re.compile('^h[1-6]$')):
         h.replace_with('\n' + '#' * int(h.name[1]) + ' ' + h.get_text(' ',strip=True) + '\n')
-    return normalize_content(root.get_text('\n', strip=True))
+    return normalize_content('\n'.join(metadata)+'\n'+root.get_text('\n', strip=True))
 
 async def fetch_webpage(url, parser=extract_html):
     url = normalize_url(url)

@@ -42,6 +42,10 @@ class Snapshot(Record, Base):
     content: Mapped[str] = mapped_column(Text)
     content_hash: Mapped[str] = mapped_column(String(64), index=True)
     source_url: Mapped[str]
+    title: Mapped[str | None]
+    published_at: Mapped[str | None]
+    source_type: Mapped[str | None]
+    capture_status: Mapped[str] = mapped_column(default='success')
 
 
 class Claim(Record, Base):
@@ -173,4 +177,51 @@ class ProgressRun(Record, Base):
     status: Mapped[str]
     error: Mapped[str | None]
     usage: Mapped[dict] = mapped_column(JSON,default=dict)
+    finished_at: Mapped[str | None]
+
+
+class DiscoverySeed(Record,Base):
+    __tablename__='discovery_seeds'
+    name: Mapped[str]
+    url: Mapped[str] = mapped_column(unique=True)
+    source_type: Mapped[str]
+    company_id: Mapped[int | None] = mapped_column(ForeignKey('companies.id'))
+    is_active: Mapped[bool] = mapped_column(default=True)
+    last_status: Mapped[str] = mapped_column(default='pending')
+    last_checked_at: Mapped[str | None]
+    error: Mapped[str | None]
+
+
+class CompanyAlias(Record,Base):
+    __tablename__='company_aliases'
+    company_id: Mapped[int] = mapped_column(ForeignKey('companies.id'),index=True)
+    alias: Mapped[str] = mapped_column(unique=True)
+
+
+class SourceCandidate(Record,Base):
+    __tablename__='source_candidates'
+    title: Mapped[str]
+    url: Mapped[str] = mapped_column(unique=True)
+    domain: Mapped[str] = mapped_column(index=True)
+    source_type: Mapped[str]
+    company_id: Mapped[int | None] = mapped_column(ForeignKey('companies.id'),index=True)
+    discovered_by: Mapped[str]
+    discovery_query: Mapped[str]
+    published_at: Mapped[str | None]
+    discovered_at: Mapped[str] = mapped_column(default=utcnow)
+    snippet: Mapped[str] = mapped_column(Text,default='')
+    relevance_score: Mapped[int]
+    source_trust_level: Mapped[str]
+    review_status: Mapped[str] = mapped_column(default='pending',index=True)
+    source_id: Mapped[int | None] = mapped_column(ForeignKey('sources.id'))
+    discovery_history: Mapped[list] = mapped_column(JSON,default=list)
+
+
+class DiscoveryRun(Record,Base):
+    __tablename__='discovery_runs'
+    status: Mapped[str] = mapped_column(default='queued')
+    kind: Mapped[str]
+    parameters: Mapped[dict] = mapped_column(JSON)
+    result: Mapped[dict] = mapped_column(JSON,default=dict)
+    error: Mapped[str | None]
     finished_at: Mapped[str | None]
