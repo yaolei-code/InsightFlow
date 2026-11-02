@@ -1,0 +1,15 @@
+.venv/
+.python/
+.uv-cache/
+node_modules/
+dist/
+__pycache__/
+.pytest_cache/
+*.db
+*.db-shm
+*.db-wal
+.env
+*.egg-info/
+evals/results.json
+.test-tmp/
+.test-verified*/
