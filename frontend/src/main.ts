@@ -9,6 +9,7 @@ import App from './App.vue'
 import Workspace from './views/Workspace.vue'
 import CompanyIntelligence from './views/CompanyIntelligence.vue'
 import Coverage from './views/Coverage.vue'
-import Home from './views/Home.vue'
-const router=createRouter({history:createWebHistory(),routes:[{path:'/',redirect:'/home'},{path:'/home',component:Home},{path:'/coverage',component:Coverage},...['/companies','/feed','/tracker','/industry','/companies/:id'].map(path=>({path,component:CompanyIntelligence})),{path:'/:page?',component:Workspace},{path:'/products/:id',component:Workspace}]})
+import Home from './views/IntelligenceHome.vue'
+import Explore from './views/Explore.vue'
+const router=createRouter({history:createWebHistory(),routes:[{path:'/',redirect:'/home'},{path:'/home',component:Home},{path:'/industry',component:Explore},{path:'/following',component:Explore},{path:'/coverage',component:Coverage},...['/companies','/feed','/tracker','/companies/:id'].map(path=>({path,component:CompanyIntelligence})),{path:'/:page?',component:Workspace},{path:'/products/:id',component:Workspace}]})
 createApp(App).use(createPinia()).use(router).use(ElementPlus).mount('#app')
