@@ -92,6 +92,11 @@ async def test_web_parser_and_robots(monkeypatch):
     text,_=await collector.fetch_webpage('https://example.org/article')
     assert 'Public company article' in text
 
+async def test_metadata_only_is_not_full_body(monkeypatch):
+    from app import collector
+    monkeypatch.setattr(collector,'safe_fetch',AsyncMock(side_effect=[('User-agent: *\nAllow: /','https://example.org/robots.txt'),('<title>A very long article title with many words but absolutely no public body</title>','https://example.org/article')]))
+    with pytest.raises(ValueError,match='元数据'):await collector.fetch_webpage('https://example.org/article')
+
 async def test_future_plan_not_deployment(db,monkeypatch):
     _,_,snap=setup_snapshot(db,'Model A plans commercial deployment in 2027.')
     monkeypatch.setattr(ai,'structured',AsyncMock(return_value=ProgressOutput(events=[event(event_type='commercial_deployment',progress_stage='commercial_deployment',evidence_text=snap.content,published_at=None,published_evidence='')])) )

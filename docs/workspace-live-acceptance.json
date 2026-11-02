@@ -1,0 +1,255 @@
+{
+  "recorded_at": "2026-11-02T15:16:05.883Z",
+  "quality": {
+    "extracted_events": 410,
+    "evidence_matched_events": 410,
+    "awaiting_review": 410,
+    "event_groups": 405,
+    "duplicate_or_related_records": 5,
+    "third_party_supported_groups": 0,
+    "important_groups": 61
+  },
+  "follows": [
+    {
+      "user_id": "local",
+      "target_type": "company",
+      "target_key": "3",
+      "id": 1,
+      "created_at": "2026-11-02T14:59:00.492046+00:00"
+    },
+    {
+      "user_id": "local",
+      "target_type": "company",
+      "target_key": "7",
+      "id": 2,
+      "created_at": "2026-11-02T14:59:01.621186+00:00"
+    }
+  ],
+  "research": [
+    {
+      "id": 9,
+      "status": "completed",
+      "query": "最近发布了哪些模型或产品？",
+      "report_id": 11,
+      "usage": {
+        "requests": 2,
+        "total_tokens": 2965
+      },
+      "trace": [
+        {
+          "tool": "understand_scope",
+          "summary": "{\"company_ids\": [], \"technology\": null, \"days\": 30}",
+          "at": "2026-11-02T15:15:27.186644+00:00"
+        },
+        {
+          "tool": "query_company_history",
+          "summary": "按日期/企业/技术筛选，找到8个事件组。",
+          "at": "2026-11-02T15:15:27.212583+00:00"
+        },
+        {
+          "tool": "evidence_assessment",
+          "summary": "按30天窗口（2026-10-03至2026-11-02）筛选已存证据，可识别多款近期发布/展出的模型与产品：星源智开源JEPA-WAM世界模型（2026-10-16）、“擎天柱”高位作业机器人首次公开展出（2026-10-16）；聆动通用iFlyBot-WAM与LindenBot-Harness发布（2026-10-23，LDU为2027新品首秀、未上市）；中科第五纪纪灵-S1（2026-10-18）；应手Y-Hand M2内部结构公开（2026-10-18，展会公开、含公司自述夸大表述）；宇树H2-X（2026-10-12，配置未公布、宣传性描述）；慧思开物应用商店上线（2026-10-27，仅标题与日期）。所有条目均为company_claim级别，需标注未经独立验证。；缺口：所有产品/模型发布均为企业自述（company_claim），缺少独立验证或第三方报道；宇树H2-X具体配置未公布，所述续航/能力为媒体转述宣传，无法确认量产或交付；慧思开物应用商店仅有标题与日期，功能细节、可用范围与商业结果未知；聆动通用LDU明确为2027新品、未上市，不属于已发售产品；WAM与Harness落地情况为公司自述；“擎天柱”仅为展会展出，非量产或部署状态；应手Y-Hand M2“全球自由度最高”“全面超越传统刚性手”为公司/报道方自述，非独立结论；多数条目无occurred_at，实际发布时间可能与published_at存在差异；各产品是否量产、交付、客户采用及商业结果均未知；缺少用户关注的具体公司或技术领域，无法进一步聚焦",
+          "at": "2026-11-02T15:15:31.243332+00:00"
+        },
+        {
+          "tool": "create_research_report",
+          "summary": "报告 #11；8个事件组。",
+          "at": "2026-11-02T15:15:31.484037+00:00"
+        }
+      ],
+      "stop_reason": "完成受控数据库优先研究；最多一次搜索、三篇正文补充。"
+    },
+    {
+      "id": 8,
+      "status": "completed",
+      "query": "最近一个月有哪些企业在 VLA 方向取得了进展？",
+      "report_id": 10,
+      "usage": {
+        "requests": 4,
+        "total_tokens": 7647
+      },
+      "trace": [
+        {
+          "tool": "understand_scope",
+          "summary": "{\"company_ids\": [], \"technology\": \"VLA\", \"days\": 30}",
+          "at": "2026-11-02T15:15:11.307635+00:00"
+        },
+        {
+          "tool": "query_company_history",
+          "summary": "按日期/企业/技术筛选，找到1个事件组。",
+          "at": "2026-11-02T15:15:11.511677+00:00"
+        },
+        {
+          "tool": "evidence_assessment",
+          "summary": "现有证据仅有一条公司自述的基准测试结果（2026-10-16 发布，接近 30 天窗口），但该记录未标注 occur_at，无法确认成果发生时间是否落在最近 30 天内；且仅覆盖一家企业、单一产品，缺少足够的 VLA 方向企业进展样本。建议先补充检索最近一个月内其他企业在 VLA 方向的公开进展。；缺口：仅 1 家企业（北京星源智）有记录，无法覆盖“哪些企业”的多主体问题；记录 occurred_at 为空，无法确认成果是否确实发生在最近 30 天内（仅有发布日期 2026-10-16）；证据级别仅为 company_claim（自述），缺少独立验证或第三方来源；缺少其他企业在 VLA 方向的进展记录（如新模型发布、开源、产品落地等）",
+          "at": "2026-11-02T15:15:13.862572+00:00"
+        },
+        {
+          "tool": "search_web",
+          "summary": "{\"query\": \"VLA 视觉语言动作模型 企业 进展 2026年10月 具身智能 机器人发布 具身智能 VLA\", \"results\": 10, \"candidates_added\": 2, \"candidate_ids\": [401, 402, 455, 479, 457, 480, 456, 459, 461, 462], \"provider\": \"tavily\", \"date_filter\": {\"start\": \"2026-10-04\", \"end\": \"2026-11-02\"}, \"note\": \"日期来自搜索元数据，须以采集正文核验；GitHub 日期过滤是 pushed 时间。\"}",
+          "at": "2026-11-02T15:15:16.550800+00:00"
+        },
+        {
+          "tool": "fetch_extract_verify",
+          "summary": "{\"candidate_id\": 402, \"status\": \"skipped\", \"reason\": \"已读取正文，但无法明确归属现有企业；自动跳过，不要求人工批准\"}",
+          "at": "2026-11-02T15:15:19.729356+00:00"
+        },
+        {
+          "tool": "fetch_extract_verify",
+          "summary": "{\"candidate_id\": 457, \"status\": \"completed\", \"reused\": true}",
+          "at": "2026-11-02T15:15:19.738151+00:00"
+        },
+        {
+          "tool": "fetch_extract_verify",
+          "summary": "{\"candidate_id\": 479, \"status\": \"skipped\", \"reason\": \"已读取正文，但无法明确归属现有企业；自动跳过，不要求人工批准\"}",
+          "at": "2026-11-02T15:15:22.711512+00:00"
+        },
+        {
+          "tool": "create_research_report",
+          "summary": "报告 #10；1个事件组。",
+          "at": "2026-11-02T15:15:23.045762+00:00"
+        }
+      ],
+      "stop_reason": "完成受控数据库优先研究；最多一次搜索、三篇正文补充。"
+    },
+    {
+      "id": 7,
+      "status": "completed",
+      "query": "最近一个月有哪些企业在 VLA 方向取得了进展？",
+      "report_id": 7,
+      "usage": {
+        "requests": 2,
+        "total_tokens": 1588
+      },
+      "trace": [
+        {
+          "tool": "understand_scope",
+          "summary": "{\"company_ids\": [], \"technology\": \"VLA\", \"days\": 30}",
+          "at": "2026-11-02T15:00:27.095452+00:00"
+        },
+        {
+          "tool": "query_company_history",
+          "summary": "按日期/企业/技术筛选，找到1个事件组。",
+          "at": "2026-11-02T15:00:27.215552+00:00"
+        },
+        {
+          "tool": "evidence_assessment",
+          "summary": "现有保存证据仅含 1 条：北京星源智（ω-EVA 具身交互世界模型，公司自述，发布于 2026-10-16），距 2026-11-02 约 17 天，落在 30 天窗口内，可作为“一家企业有进展”的线索。但：(1) 仅覆盖 1 家企业，无法回答“有哪些企业”的复数问题；(2) 证据为 company_claim 级别，未经独立验证；(3) 未明确该模型是否属于 VLA（视觉-语言-动作）范式，只称“具身交互世界模型”，存在口径偏差风险；(4) 其余近 30 天企业进展完全缺失。因此不足，需补充检索。；缺口：仅有 1 家企业（北京星源智）记录，缺少其他企业在近 30 天的 VLA 进展证据；ω-EVA 被描述为“具身交互世界模型”，未说明是否属于 VLA 路线，技术口径待核实；证据级别仅为 company_claim，缺少独立基准复现或第三方验证；缺少 occurdate/发布时间以外的实际进展时间点（occurred_at 为空），事件是否发生在本月内不确定；缺少其他企业（如机器人本体厂商、大模型公司）在近 30 天的公开进展记录",
+          "at": "2026-11-02T15:00:30.184840+00:00"
+        },
+        {
+          "tool": "search_web",
+          "summary": "{\"query\": \"VLA 视觉语言动作模型 2026年10月 企业 发布 进展 机器人发布 具身智能 VLA\", \"results\": 10, \"candidates_added\": 0, \"provider\": \"tavily\", \"date_filter\": {\"start\": \"2026-10-04\", \"end\": \"2026-11-02\"}, \"note\": \"日期来自搜索元数据，须以采集正文核验；GitHub 日期过滤是 pushed 时间。\"}",
+          "at": "2026-11-02T15:00:31.471056+00:00"
+        },
+        {
+          "tool": "create_research_report",
+          "summary": "报告 #7；1个事件组。",
+          "at": "2026-11-02T15:00:31.646742+00:00"
+        }
+      ],
+      "stop_reason": "完成受控数据库优先研究；最多一次搜索、三篇正文补充。"
+    },
+    {
+      "id": 6,
+      "status": "completed",
+      "query": "最近一个月有哪些企业在 VLA 方向取得了进展？",
+      "report_id": 6,
+      "usage": {
+        "requests": 4,
+        "total_tokens": 10949
+      },
+      "trace": [
+        {
+          "tool": "understand_scope",
+          "summary": "{\"company_ids\": [], \"technology\": \"VLA\", \"days\": 30}",
+          "at": "2026-11-02T14:58:59.437568+00:00"
+        },
+        {
+          "tool": "query_company_history",
+          "summary": "按日期/企业/技术筛选，找到1个事件组。",
+          "at": "2026-11-02T14:58:59.458460+00:00"
+        },
+        {
+          "tool": "evidence_assessment",
+          "summary": "现有记录只有星源智一家企业的一条证据（2026-10-16，公司自述的性能基准，未明确标注为 VLA 方向）。时间上虽在 30 天内，但覆盖面严重不足：无法回答“有哪些企业”以及各企业在 VLA 方向的具体进展。建议先补充检索 2026-10-03 至 2026-11-02 期间公开披露 VLA 相关进展的企业。；缺口：仅覆盖 1 家企业（星源智），无法代表“有哪些企业”；该证据未明确标注属于 VLA 技术方向，需核实；仅有 company_claim 级别证据，缺少独立验证；缺少其他企业（如机器人、自动驾驶、大模型厂商）在 VLA 方向的进展记录；未覆盖 2026-10-03 至 2026-10-15 以及 2026-10-17 至 2026-11-02 期间的信息",
+          "at": "2026-11-02T14:59:01.636579+00:00"
+        },
+        {
+          "tool": "search_web",
+          "summary": "{\"query\": \"VLA 视觉语言动作模型 企业 进展 2026年10月 OR 2026年11月 机器人发布 具身智能 VLA\", \"results\": 10, \"candidates_added\": 6, \"provider\": \"tavily\", \"date_filter\": {\"start\": \"2026-10-04\", \"end\": \"2026-11-02\"}, \"note\": \"日期来自搜索元数据，须以采集正文核验；GitHub 日期过滤是 pushed 时间。\"}",
+          "at": "2026-11-02T14:59:04.282765+00:00"
+        },
+        {
+          "tool": "fetch_extract_verify",
+          "summary": "{\"candidate_id\": 463, \"status\": \"skipped\", \"reason\": \"已读取正文，但无法明确归属现有企业；自动跳过，不要求人工批准\"}",
+          "at": "2026-11-02T14:59:06.717381+00:00"
+        },
+        {
+          "tool": "fetch_extract_verify",
+          "summary": "{\"candidate_id\": 465, \"status\": \"failed\", \"reason\": \"robots.txt 禁止采集\"}",
+          "at": "2026-11-02T14:59:07.411361+00:00"
+        },
+        {
+          "tool": "fetch_extract_verify",
+          "summary": "{\"candidate_id\": 466, \"status\": \"skipped\", \"reason\": \"已读取正文，但无法明确归属现有企业；自动跳过，不要求人工批准\"}",
+          "at": "2026-11-02T14:59:10.737308+00:00"
+        },
+        {
+          "tool": "create_research_report",
+          "summary": "报告 #6；1个事件组。",
+          "at": "2026-11-02T14:59:10.944859+00:00"
+        }
+      ],
+      "stop_reason": "完成受控数据库优先研究；最多一次搜索、三篇正文补充。"
+    },
+    {
+      "id": 5,
+      "status": "failed",
+      "query": "最近一个月有哪些企业在 VLA 方向取得了进展？",
+      "report_id": null,
+      "usage": {
+        "requests": 5,
+        "total_tokens": 12926
+      },
+      "trace": [
+        {
+          "tool": "understand_scope",
+          "summary": "{\"company_ids\": [], \"technology\": \"VLA\", \"days\": 30}",
+          "at": "2026-11-02T14:54:40.315614+00:00"
+        },
+        {
+          "tool": "query_company_history",
+          "summary": "按日期/企业/技术筛选，找到0个事件组。",
+          "at": "2026-11-02T14:54:40.337019+00:00"
+        },
+        {
+          "tool": "evidence_assessment",
+          "summary": "当前无任何已保存证据（SAVED EVIDENCE 为空），无法判断近30天（约2026-10-03至2026-11-02）内企业在 VLA（视觉-语言-动作模型）方向的进展。需先检索公开来源，按企业归集证据；所有结论仅基于检索到的可核查公开材料，缺失即记为未知。；缺口：无任何已保存证据，范围（30天）与公司维度均无法覆盖；缺少企业在 VLA 方向的公开进展记录（如模型/产品发布、演示、路线图）；缺少企业名称、时间戳与来源链接以进行证据核验；无法区分已商用、DEMO、ILLUSTRATIVE、COMING SOON、IN DEVELOPMENT 等状态；无法确认检索窗口内是否存在实质性进展，仍需检索验证",
+          "at": "2026-11-02T14:54:42.513829+00:00"
+        },
+        {
+          "tool": "search_web",
+          "summary": "{\"query\": \"VLA 视觉语言动作模型 2026年10月 企业 发布 进展 机器人发布 具身智能 VLA\", \"results\": 10, \"candidates_added\": 9, \"provider\": \"tavily\", \"date_filter\": {\"start\": \"2026-10-04\", \"end\": \"2026-11-02\"}, \"note\": \"日期来自搜索元数据，须以采集正文核验；GitHub 日期过滤是 pushed 时间。\"}",
+          "at": "2026-11-02T14:54:45.139944+00:00"
+        },
+        {
+          "tool": "fetch_extract_verify",
+          "summary": "{\"candidate_id\": 454, \"status\": \"skipped\", \"reason\": \"已读取正文，但无法明确归属现有企业；自动跳过，不要求人工批准\"}",
+          "at": "2026-11-02T14:54:47.404122+00:00"
+        },
+        {
+          "tool": "fetch_extract_verify",
+          "summary": "{\"candidate_id\": 457, \"company_id\": 29, \"status\": \"completed\", \"snapshot_id\": 206, \"events\": 11, \"rejected_evidence\": 0}",
+          "at": "2026-11-02T14:55:01.305807+00:00"
+        },
+        {
+          "tool": "fetch_extract_verify",
+          "summary": "{\"candidate_id\": 459, \"status\": \"failed\", \"reason\": \"robots.txt 禁止采集\"}",
+          "at": "2026-11-02T14:55:01.977752+00:00"
+        }
+      ],
+      "stop_reason": "提取失败：IntegrityError"
+    }
+  ]
+}

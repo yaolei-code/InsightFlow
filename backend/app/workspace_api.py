@@ -30,6 +30,8 @@ class Decision(Strict):
 class Scope(Strict):
     company_ids:list[int]
     technology:str|None
+    event_types:list[Literal['technology_breakthrough','model_release','product_release','robot_demo','benchmark_result','open_source_release','pilot_deployment','commercial_deployment','customer_cooperation','funding','mass_production','other']]=Field(default_factory=list)
+    progress_stages:list[Literal['research','prototype','demonstration','pilot','commercial_deployment','scaled_production','unknown']]=Field(default_factory=list)
 class ReviewInput(Strict):
     status:Literal['pending','reviewed','questionable']
 
@@ -94,7 +96,7 @@ async def run_research(id):
             try:
                 params=session.parameters
                 known=[{'id':c.id,'name':c.name} for c in db.scalars(select(m.Company))]
-                scope=await ai.structured(Scope,'Extract company scope and one technology from question. Use ONLY supplied IDs/technologies, empty company_ids/null technology means no restriction. Do not infer a company not named. QUESTION: '+session.user_query+'\nCOMPANIES: '+json.dumps(known,ensure_ascii=False)+'\nTECHNOLOGIES: '+json.dumps(list(TECHNOLOGIES)),usage)
+                scope=await ai.structured(Scope,'Extract company scope, one technology, and optional event types/development stages explicitly requested in question. Use ONLY supplied IDs/technologies and schema enums. Empty lists/null mean no restriction. Do not infer a company not named. For broad progress queries do not restrict event types/stages. QUESTION: '+session.user_query+'\nCOMPANIES: '+json.dumps(known,ensure_ascii=False)+'\nTECHNOLOGIES: '+json.dumps(list(TECHNOLOGIES)),usage)
                 if scope.technology not in TECHNOLOGIES:scope.technology=None
                 if not params.get('technology'):params={**params,'technology':scope.technology}
                 allowed={c['id'] for c in known}
@@ -102,6 +104,8 @@ async def run_research(id):
                 trace('understand_scope',json.dumps({'company_ids':scope.company_ids,'technology':params.get('technology'),'days':params['days']},ensure_ascii=False))
                 rows=records(db,params['days'],params.get('company_id'),params.get('technology'))
                 if scope.company_ids and not params.get('company_id'):rows=[r for r in rows if r['company_id'] in scope.company_ids]
+                if scope.event_types:rows=[r for r in rows if r['event_type'] in scope.event_types]
+                if scope.progress_stages:rows=[r for r in rows if r['progress_stage'] in scope.progress_stages]
                 trace('query_company_history',f'按日期/企业/技术筛选，找到{len(rows)}个事件组。')
                 payload=[{k:e[k] for k in ('id','title','description','company_name','evidence_levels','occurred_at','published_at')} for e in rows[:30]]
                 today=datetime.now(timezone.utc).date()
@@ -124,7 +128,9 @@ async def run_research(id):
                 quality(db)
                 rows=records(db,params['days'],params.get('company_id'),params.get('technology'))
                 if scope.company_ids and not params.get('company_id'):rows=[r for r in rows if r['company_id'] in scope.company_ids]
-                saved=report(db,session.user_query,rows,'用户范围：'+json.dumps({**params,'derived_company_ids':scope.company_ids},ensure_ascii=False),decision.gaps)
+                if scope.event_types:rows=[r for r in rows if r['event_type'] in scope.event_types]
+                if scope.progress_stages:rows=[r for r in rows if r['progress_stage'] in scope.progress_stages]
+                saved=report(db,session.user_query,rows,'用户范围：'+json.dumps({**params,'derived_scope':scope.model_dump()},ensure_ascii=False),decision.gaps)
                 session.report_id=saved.id;session.summary=f'已汇编{len(rows)}个事件组；结论仅限已保存证据。';session.stop_reason='完成受控数据库优先研究；最多一次搜索、三篇正文补充。';session.status='completed'
                 trace('create_research_report',f'报告 #{saved.id}；{len(rows)}个事件组。')
             except Exception as exc:

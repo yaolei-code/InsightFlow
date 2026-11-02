@@ -86,7 +86,7 @@ def extract_html(html):
         node=soup.find('meta',attrs=attrs)
         if node and node.get('content'):
             metadata.append('Published: '+node['content'].strip());break
-    for node in soup.select('script,style,nav,footer,header,aside,noscript,[role=navigation]'):
+    for node in soup.select('head,title,meta,link,script,style,nav,footer,header,aside,noscript,[role=navigation]'):
         node.decompose()
     root = soup.find(id='js_content') or soup.find('main') or soup.find('article') or soup.body or soup
     for h in root.find_all(re.compile('^h[1-6]$')):
@@ -116,6 +116,9 @@ async def fetch_webpage(url, parser=extract_html):
         # Fetch again after checking the redirected origin's robots policy.
         return await fetch_webpage(final,parser)
     text = parser(html)
+    if parser is extract_html:
+        body='\n'.join(line for line in text.splitlines() if not line.startswith(('Article title:','Published:')))
+        if len(body.strip())<40:raise ValueError('仅取得标题/元数据，正文可能需要 JavaScript；未取得可分析正文')
     if len(text) < 40:
         raise ValueError('正文不足，可能需要 JavaScript；请更换公开文档源')
     return text, final
