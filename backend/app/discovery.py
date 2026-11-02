@@ -152,3 +152,10 @@ async def execute_discovery(id):
                 db.rollback();run=db.get(m.DiscoveryRun,id);run.status='failed'
                 run.error=str(exc)[:300] if isinstance(exc,(SearchUnavailable,ValueError)) else '发现失败：'+type(exc).__name__
             run.finished_at=utcnow();db.commit()
+            from .config import settings
+            if run.status=='completed' and settings.auto_ingest_discoveries and settings.openai_api_key:
+                from .ingestion import run_ingestion
+                child=m.DiscoveryRun(kind='ingest',parameters={'limit':10,'candidate_ids':[],'retry_failed':False})
+                db.add(child);db.commit()
+                run.result={**run.result,'auto_ingest_run_id':child.id};db.commit()
+                await run_ingestion(child.id)

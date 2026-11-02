@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     wechat_search_api_key: str = ''
     tavily_api_key: str = ''
     search_provider: Literal['tavily','github'] = 'tavily'
+    auto_ingest_discoveries: bool = True
 
 
 settings = Settings()

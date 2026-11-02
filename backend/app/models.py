@@ -215,6 +215,9 @@ class SourceCandidate(Record,Base):
     review_status: Mapped[str] = mapped_column(default='pending',index=True)
     source_id: Mapped[int | None] = mapped_column(ForeignKey('sources.id'))
     discovery_history: Mapped[list] = mapped_column(JSON,default=list)
+    decision_method: Mapped[str] = mapped_column(default='unreviewed')
+    processing_status: Mapped[str] = mapped_column(default='not_started',index=True)
+    processing_error: Mapped[str | None]
 
 
 class DiscoveryRun(Record,Base):

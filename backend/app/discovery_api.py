@@ -37,6 +37,22 @@ class AliasInput(Strict):
     company_id:int
     alias:str=Field(min_length=2,max_length=100)
 
+class IngestInput(Strict):
+    limit:int=Field(default=10,ge=1,le=30)
+    candidate_ids:list[int]=Field(default_factory=list,max_length=30)
+    retry_failed:bool=False
+
+@router.post('/discovery/ingest',status_code=202)
+async def auto_ingest(body:IngestInput,db:Session=DB):
+    from .main import workers
+    from .ingestion import run_ingestion
+    if not settings.openai_api_key:raise HTTPException(409,'未配置模型，无法提取事件')
+    if db.scalar(select(m.DiscoveryRun).where(m.DiscoveryRun.status.in_(['queued','running']))):raise HTTPException(409,'已有发现或入库任务执行中')
+    if db.scalar(select(m.ResearchTask).where(m.ResearchTask.status.in_(['queued','running']))):raise HTTPException(409,'已有研究任务执行中')
+    row=m.DiscoveryRun(kind='ingest',parameters=body.model_dump());db.add(row);db.commit()
+    task=asyncio.create_task(run_ingestion(row.id));workers.add(task);task.add_done_callback(workers.discard)
+    return asdict(row)
+
 def require(db,model,id):
     row=db.get(model,id)
     if not row:raise HTTPException(404,'记录不存在')
@@ -112,6 +128,7 @@ def review(id:int,body:ReviewInput,db:Session=DB):
         row.company_id=cid;row.source_id=source.id
         if body.source_type:row.source_type=body.source_type
     row.review_status=body.review_status
+    row.decision_method='manual'
     db.commit();return asdict(row)
 
 @router.get('/company-aliases')
