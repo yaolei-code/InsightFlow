@@ -1,5 +1,11 @@
 # InsightFlow
 
+当前方向：**具身智能行业 Company Intelligence Platform**。新增企业档案、多源采集、多事件进展提取、企业时间线、行业技术地图和最近一周报告，保留全部产品研究功能。入口为 `/companies`；设计、迁移、实际验收与限制见 [企业情报阶段说明](docs/company-intelligence.md)。
+
+企业阶段实测：11 家企业、4 条带真实引文的事件；官网新闻/技术博客、GitHub、arXiv 均已保存真实快照。公众号适配已实现并离线测试，尚无真实公众号验收文章。前端生产构建通过。
+
+当前完整回归：**58 passed in 24.51s**（本地 Fixture / Mock Provider，含旧产品功能和新增企业功能）。
+
 AI-Powered Competitive Intelligence & Product Change Analysis Platform
 
 基于 AI Agent 的竞品情报监测与产品影响分析平台。**Evidence First, Analysis Second.**

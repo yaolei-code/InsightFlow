@@ -6,5 +6,6 @@ import 'element-plus/dist/index.css'
 import './style.css'
 import App from './App.vue'
 import Workspace from './views/Workspace.vue'
-const router=createRouter({history:createWebHistory(),routes:[{path:'/:page?',component:Workspace},{path:'/products/:id',component:Workspace}]})
+import CompanyIntelligence from './views/CompanyIntelligence.vue'
+const router=createRouter({history:createWebHistory(),routes:[{path:'/',redirect:'/companies'},...['/companies','/feed','/tracker','/industry','/companies/:id'].map(path=>({path,component:CompanyIntelligence})),{path:'/:page?',component:Workspace},{path:'/products/:id',component:Workspace}]})
 createApp(App).use(createPinia()).use(router).use(ElementPlus).mount('#app')

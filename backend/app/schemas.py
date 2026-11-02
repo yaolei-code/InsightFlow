@@ -30,7 +30,7 @@ class SourceInput(Strict):
 class SourcePatch(Strict):
     url: str | None = None
     is_active: bool | None = None
-    source_type: Literal['official_website','documentation','github_repository','release_notes','other'] | None = None
+    source_type: Literal['official_website','documentation','github_repository','release_notes','company_news','wechat_official_account','github','arxiv','technical_blog','industry_media','press_release','customer_case','video','job_posting','other'] | None = None
 
 class ClaimOutput(Strict):
     dimension: Dimension

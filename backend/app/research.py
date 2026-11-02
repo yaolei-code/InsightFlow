@@ -7,6 +7,8 @@ from . import models as m, ai
 from .db import Session, utcnow
 from .collector import fetch_webpage, fetch_github_repo, normalize_content, content_hash
 from .extraction import extract_saved_snapshot
+from .progress import extract_progress
+from . import adapters
 
 log = logging.getLogger(__name__)
 execution_lock = asyncio.Lock()
@@ -30,7 +32,12 @@ def create_snapshot(db, source, content, url):
 
 async def process_source(db, source, usage):
     try:
-        if source.source_type == 'github_repository':
+        if source.company_id and not source.product_id:
+            if source.source_type=='wechat_official_account':
+                text,url=await adapters.wechat_provider.fetch(source.url)
+            else:
+                text,url=await adapters.collect(source)
+        elif source.source_type == 'github_repository':
             from urllib.parse import urlsplit
             p = urlsplit(source.url)
             if p.hostname != 'github.com':
@@ -54,6 +61,9 @@ async def process_source(db, source, usage):
     note = '建立基线完成，等待下一次采集' if created and not previous else ('内容未变化' if not created else '新快照已保存')
     if not ai.settings.openai_api_key:
         return note + '；未配置模型，AI 分析未执行'
+    if source.company_id and not source.product_id:
+        result=await extract_progress(db,snapshot.id,usage)
+        return note+'；企业事件：'+str(result)
     if not previous and snapshot.sequence > 1:
         previous = db.scalar(select(m.Snapshot).where(m.Snapshot.source_id==source.id,m.Snapshot.sequence==snapshot.sequence-1))
     await extract_saved_snapshot(db,snapshot.id,usage)
@@ -106,7 +116,8 @@ async def run_task(task_id):
             for i, sid in enumerate(items):
                 try:
                     if task.snapshot_ids:
-                        result=await asyncio.wait_for(extract_saved_snapshot(db,sid,usage),timeout=180)
+                        extractor=extract_progress if task.task_kind=='company' else extract_saved_snapshot
+                        result=await asyncio.wait_for(extractor(db,sid,usage),timeout=180)
                         message='快照提取完成：'+str(result)
                     else:
                         source = db.get(m.Source,sid)

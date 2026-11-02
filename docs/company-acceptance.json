@@ -1,0 +1,54 @@
+{
+  "executed_at": "2026-11-02T12:23:12.330138+00:00",
+  "mock": false,
+  "companies": 11,
+  "events": 4,
+  "sources": [
+    {
+      "company": "Physical Intelligence",
+      "url": "https://www.pi.website/blog/api-beta",
+      "source_type": "technical_blog",
+      "status": "success",
+      "snapshot_id": 5,
+      "characters": 5723,
+      "new_snapshot": false,
+      "extraction": {
+        "events": 3,
+        "reused": true
+      },
+      "usage": {}
+    },
+    {
+      "company": "逐际动力",
+      "url": "https://www.limxdynamics.com/zh/news/BK000065",
+      "source_type": "company_news",
+      "status": "success",
+      "snapshot_id": 6,
+      "characters": 57,
+      "new_snapshot": false,
+      "extraction": {
+        "events": 1,
+        "reused": true
+      },
+      "usage": {}
+    },
+    {
+      "company": "Physical Intelligence",
+      "url": "https://github.com/Physical-Intelligence/openpi",
+      "source_type": "github",
+      "status": "success",
+      "snapshot_id": 4,
+      "characters": 21539,
+      "new_snapshot": false
+    },
+    {
+      "company": "Physical Intelligence",
+      "url": "https://arxiv.org/abs/2410.24164",
+      "source_type": "arxiv",
+      "status": "success",
+      "snapshot_id": 7,
+      "characters": 2174,
+      "new_snapshot": true
+    }
+  ]
+}

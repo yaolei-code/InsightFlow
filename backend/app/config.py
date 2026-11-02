@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     llm_protocol: Literal['responses','chat','json'] = "responses"
     enable_tracing: bool = False
     github_token: str = ""
+    wechat_search_api_url: str = ''
+    wechat_search_api_key: str = ''
 
 
 settings = Settings()

@@ -80,12 +80,12 @@ def extract_html(html):
     soup = BeautifulSoup(html, 'html.parser')
     for node in soup.select('script,style,nav,footer,header,aside,noscript,[role=navigation]'):
         node.decompose()
-    root = soup.find('main') or soup.find('article') or soup.body or soup
+    root = soup.find(id='js_content') or soup.find('main') or soup.find('article') or soup.body or soup
     for h in root.find_all(re.compile('^h[1-6]$')):
         h.replace_with('\n' + '#' * int(h.name[1]) + ' ' + h.get_text(' ',strip=True) + '\n')
     return normalize_content(root.get_text('\n', strip=True))
 
-async def fetch_webpage(url):
+async def fetch_webpage(url, parser=extract_html):
     url = normalize_url(url)
     p = urlsplit(url)
     try:
@@ -95,19 +95,19 @@ async def fetch_webpage(url):
             robots = ''
         else:
             raise ValueError('无法确认 robots.txt 许可，暂不采集') from exc
-    parser = RobotFileParser()
-    parser.parse(robots.splitlines())
-    if not parser.can_fetch('InsightFlow', url):
+    robots_parser = RobotFileParser()
+    robots_parser.parse(robots.splitlines())
+    if not robots_parser.can_fetch('InsightFlow', url):
         raise ValueError('robots.txt 禁止采集')
-    delay = parser.crawl_delay('InsightFlow') or parser.crawl_delay('*') or 0
+    delay = robots_parser.crawl_delay('InsightFlow') or robots_parser.crawl_delay('*') or 0
     if delay > 30:
         raise ValueError('站点 crawl-delay 超出 MVP 上限')
     await asyncio.sleep(delay)
     html, final = await safe_fetch(url)
     if urlsplit(final).netloc != p.netloc:
         # Fetch again after checking the redirected origin's robots policy.
-        return await fetch_webpage(final)
-    text = extract_html(html)
+        return await fetch_webpage(final,parser)
+    text = parser(html)
     if len(text) < 40:
         raise ValueError('正文不足，可能需要 JavaScript；请更换公开文档源')
     return text, final

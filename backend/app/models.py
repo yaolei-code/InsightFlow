@@ -12,6 +12,7 @@ class Product(Record, Base):
     __tablename__ = "products"
     name: Mapped[str] = mapped_column(String(200))
     company: Mapped[str] = mapped_column(default="")
+    company_id: Mapped[int | None] = mapped_column(ForeignKey('companies.id'), index=True)
     category: Mapped[str] = mapped_column(default="")
     description: Mapped[str] = mapped_column(Text, default="")
     official_url: Mapped[str] = mapped_column(default="")
@@ -21,7 +22,10 @@ class Product(Record, Base):
 
 class Source(Record, Base):
     __tablename__ = "sources"
-    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"), index=True)
+    product_id: Mapped[int | None] = mapped_column(ForeignKey("products.id"), index=True)
+    company_id: Mapped[int | None] = mapped_column(ForeignKey('companies.id'), index=True)
+    project_id: Mapped[int | None] = mapped_column(ForeignKey('projects.id'))
+    evidence_authority: Mapped[str] = mapped_column(default='company_claim')
     url: Mapped[str]
     source_type: Mapped[str]
     is_active: Mapped[bool] = mapped_column(default=True)
@@ -93,6 +97,7 @@ class ResearchTask(Record, Base):
     logs: Mapped[list] = mapped_column(JSON, default=list)
     source_ids: Mapped[list] = mapped_column(JSON)
     snapshot_ids: Mapped[list] = mapped_column(JSON, default=list)
+    task_kind: Mapped[str] = mapped_column(default='product')
     finished_at: Mapped[str | None]
     usage: Mapped[dict] = mapped_column(JSON, default=dict)
 
@@ -112,3 +117,60 @@ class Comparison(Record, Base):
     product_ids: Mapped[list] = mapped_column(JSON)
     relationship: Mapped[str]
     rationale: Mapped[str] = mapped_column(Text)
+
+
+class Company(Record, Base):
+    __tablename__='companies'
+    name: Mapped[str] = mapped_column(unique=True)
+    category: Mapped[str] = mapped_column(default='待研究')
+    description: Mapped[str] = mapped_column(Text,default='')
+    official_url: Mapped[str] = mapped_column(default='')
+    technology_tags: Mapped[list] = mapped_column(JSON,default=list)
+    is_active: Mapped[bool] = mapped_column(default=True)
+    updated_at: Mapped[str] = mapped_column(default=utcnow,onupdate=utcnow)
+
+
+class Project(Record, Base):
+    __tablename__='projects'
+    __table_args__=(UniqueConstraint('company_id','name'),)
+    company_id: Mapped[int] = mapped_column(ForeignKey('companies.id'),index=True)
+    name: Mapped[str]
+    technology_tags: Mapped[list] = mapped_column(JSON,default=list)
+    description: Mapped[str] = mapped_column(Text,default='')
+
+
+class EventEvidence(Record, Base):
+    __tablename__='event_evidence'
+    company_id: Mapped[int] = mapped_column(ForeignKey('companies.id'),index=True)
+    snapshot_id: Mapped[int] = mapped_column(ForeignKey('snapshots.id'),index=True)
+    source_url: Mapped[str]
+    evidence_text: Mapped[str] = mapped_column(Text)
+    evidence_level: Mapped[str]
+
+
+class ProgressEvent(Record, Base):
+    __tablename__='progress_events'
+    __table_args__=(UniqueConstraint('snapshot_id','title'),)
+    company_id: Mapped[int] = mapped_column(ForeignKey('companies.id'),index=True)
+    project_id: Mapped[int | None] = mapped_column(ForeignKey('projects.id'))
+    snapshot_id: Mapped[int] = mapped_column(ForeignKey('snapshots.id'),index=True)
+    event_type: Mapped[str]
+    title: Mapped[str]
+    description: Mapped[str] = mapped_column(Text)
+    capability_tags: Mapped[list] = mapped_column(JSON)
+    progress_stage: Mapped[str]
+    published_at: Mapped[str | None] = mapped_column(index=True)
+    occurred_at: Mapped[str | None]
+    evidence_ids: Mapped[list] = mapped_column(JSON)
+    evidence_level: Mapped[str]
+    verification_status: Mapped[str]
+    metrics: Mapped[list] = mapped_column(JSON)
+
+
+class ProgressRun(Record, Base):
+    __tablename__='progress_runs'
+    snapshot_id: Mapped[int] = mapped_column(ForeignKey('snapshots.id'),unique=True)
+    status: Mapped[str]
+    error: Mapped[str | None]
+    usage: Mapped[dict] = mapped_column(JSON,default=dict)
+    finished_at: Mapped[str | None]
