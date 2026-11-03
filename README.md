@@ -1,63 +1,93 @@
 # InsightFlow
 
-当前工作台升级已收尾：真实研究首页、矩阵/局部关系图/企业列表、可逆事件聚合、重要性与审阅标记、本地关注和个性化简报。[完整验收与限制](docs/workspace-upgrade-acceptance.md)。后端99项测试、前端6项规则测试及8个真实Edge流程检查点通过。
+面向具身智能行业的企业情报工作台：发现公开资料、保存原始快照、提取企业进展与产品能力，并用可追溯证据支持研究。**Evidence First, Analysis Second.** 搜索摘要、企业宣传和模型推断都不自动成为已证实的事实。
 
-新首页 `/home` 以六个行业研究问题组织真实资料；行业地图支持企业卡片、企业/别名搜索、技术方向筛选和最多4家精简对比。[交互说明](docs/question-home-and-map.md)。前端语义测试：`cd frontend; npm test`。
+本项目用于展示全栈工程、数据采集、受控 AI 研究流程与证据追溯设计。首次安装不会带入开发者的数据库或密钥，可先运行离线测试，再配置自己的公开数据源与模型。
 
-积压全量处理已完成：443条候选中194完成、211跳过、38失败，未处理为0。行业地图现有398条来源事件记录、119个非空单元格；产品矩阵57条Claim中35条原文验证通过。记录数不代表去重新闻或独立能力数。[全量处理及矩阵修复](docs/backlog-and-matrix-fixes.md)。
+## 当前功能
 
-**最新交互调整：无需人工审核。** 发现后自动采集正文、识别企业并提取带证据事件；现有积压可在 `/coverage` 一键处理10篇。人工登记仅作为可选操作。规则和实际结果见 [自动入库说明](docs/automatic-ingestion.md)。
+- 企业、项目与产品分离管理；企业别名及多个公开来源。
+- Tavily 搜索发现、栏目/sitemap 链接发现、候选 URL 规范化与去重；可自动采集入库，人工标记可选。
+- 官网、新闻/博客、GitHub、arXiv、用户导入公开微信公众号文章等来源适配；保存正文、URL、时间、Hash 和真实错误状态。
+- 从真实 Snapshot 提取 Claim、ProgressEvent、技术标签、阶段与公开指标；Pydantic 校验和原文证据匹配；保留未知、冲突和发布限定。
+- 自然语言研究首页、企业档案/时间线、行业动态、技术矩阵/局部关系图/企业列表、产品能力对比。
+- 数据库优先的有预算研究流程、可追溯报告、企业/技术关注和关注简报；事件关联、重要性依据与可选审阅状态。
 
-最新 Milestone：**Industry Intelligence Coverage Expansion**。新增 `/coverage` 来源发现工作台，真实 Tavily / GitHub 搜索、16 个行业与企业入口、栏目 / sitemap 发现、公司别名和人工候选审核。实测 443 条待审核候选；正式进展仍为 4 条，未把搜索摘要当事实。实现与真实限制见 [覆盖扩展说明](docs/coverage-expansion.md)。
+## 架构与目录
 
-当前方向：**具身智能行业 Company Intelligence Platform**。新增企业档案、多源采集、多事件进展提取、企业时间线、行业技术地图和最近一周报告，保留全部产品研究功能。入口为 `/companies`；设计、迁移、实际验收与限制见 [企业情报阶段说明](docs/company-intelligence.md)。
-
-企业阶段实测：11 家企业、4 条带真实引文的事件；官网新闻/技术博客、GitHub、arXiv 均已保存真实快照。公众号适配已实现并离线测试，尚无真实公众号验收文章。前端生产构建通过。
-
-当前完整回归：**58 passed in 24.51s**（本地 Fixture / Mock Provider，含旧产品功能和新增企业功能）。
-
-AI-Powered Competitive Intelligence & Product Change Analysis Platform
-
-基于 AI Agent 的竞品情报监测与产品影响分析平台。**Evidence First, Analysis Second.**
-
-第二阶段已接通 DeepSeek Flash 的真实快照提取：Sinfra 实测 16 条 Claim，11 条验证通过，5 条未知/待核验；43 项离线测试通过。配置、审计、限制及验收见 [第二阶段记录](docs/stage2.md)。
-
-面向具身智能研发基础设施研究，初始对象为 Simate Sinfra、FluxVLA Engine、NVIDIA Isaac。产品不是完全等价的竞争对手，平台保留人工审阅的竞争关系，明确区分已发布、演示、计划、开发中和未知能力。
-
-## 技术架构
-
-Vue 3 + TypeScript + Vite + Element Plus + Pinia → FastAPI → SQLAlchemy 2 / SQLite。
-受控研究工作流使用 OpenAI Agents SDK；确定性采集、规范化、Hash、Diff、数据库写入和证据校验在 Python 执行。Alembic 负责数据库迁移。
-
-## 环境与安装
-
-需要 Python 3.11+（建议 3.12）、Node 22+、npm。以下命令在项目根目录的 PowerShell 中执行。安装 uv 的用户可用 `uv venv --python 3.12 .venv` 替代第一条命令。
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -e './backend[test]'
-Copy-Item .env.example .env
-Set-Location frontend
-npm ci
-Set-Location ..
+```text
+Vue 3 / TypeScript / Vite / Element Plus / Pinia
+                 ↓ 本地 HTTP API
+FastAPI → 采集与搜索适配 → Snapshot → LLM 结构化提取 → 证据校验
+                 ↓ SQLAlchemy / SQLite / Alembic
+       Company / Project / Claim / ProgressEvent / Report
 ```
 
-如果全局 Python 过旧，请明确调用 3.12 或使用 uv。当前开发环境已在 `.venv` 安装依赖。
+`backend/app` 包含 API、服务和适配器；`backend/alembic` 是增量迁移；`frontend/src` 是现有工作台；`fixtures` 和测试目录仅保存离线测试资料；`scripts` 是启动、审计及显式联网验收脚本。真实数据库与运行产物只在本地保留。
 
-## 初始化与启动
+## 安装
 
-终端一（保持项目根目录）：
+需要 Python 3.11+（建议 3.12）、Node.js 22+ 和 npm。以下命令在项目根目录的 PowerShell 执行。
+
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -e './backend[test]'
+# 仅在 .env 不存在时复制，避免覆盖已有密钥。
+if (!(Test-Path .env)) { Copy-Item .env.example .env }
+cd frontend
+npm ci
+cd ..
+```
+
+没有 Windows Python Launcher 时用 Python 3.11+ 的 `python`，或 `uv venv --python 3.12 .venv`。Linux/macOS 用 `.venv/bin/python`；手动启动时先进入 `backend`。
+
+前端 `package-lock.json` 用于 `npm ci`；后端版本范围见 `backend/pyproject.toml`，开发环境版本记录见 `backend/requirements.lock`。若需复现该环境，可先用 `pip install -r backend/requirements.lock`，再安装本地项目。
+
+## 配置
+
+复制后的 `.env` **只在本地编辑，不提交**。完整无密钥模板见 [.env.example](.env.example)。系统按根目录绝对路径加载 `.env`，进程环境变量优先。
+
+| 变量 | 用途与默认值 |
+| --- | --- |
+| `DATABASE_URL` | `sqlite:///./insightflow.db`；相对后端工作目录 |
+| `OPENAI_API_KEY` | 模型密钥；空值时明确报告模型未配置 |
+| `OPENAI_BASE_URL` | 空值使用官方 OpenAI 端点，可配置兼容服务 |
+| `OPENAI_MODEL` | 默认 `gpt-4.1-mini`，须是账户可用模型 |
+| `LLM_PROTOCOL` | `responses`、`chat`、`json`；兼容端点可用 JSON 模式，仍校验结构 |
+| `ENABLE_TRACING` | 默认 `false`；开启会向 SDK 的追踪服务发送研究内容 |
+| `TAVILY_API_KEY` | Tavily 公开网页搜索；缺失时报错，无虚假搜索结果 |
+| `SEARCH_PROVIDER` | `tavily`（默认）或 `github` |
+| `GITHUB_TOKEN` | 可选，GitHub API Token；不是仓库推送认证配置 |
+| `WECHAT_SEARCH_API_URL` / `WECHAT_SEARCH_API_KEY` | 可选合规第三方搜索接口，约定见模板 |
+| `AUTO_INGEST_DISCOVERIES` | 默认 `true`，自动采集已发现候选正文 |
+
+DeepSeek 兼容配置示例（密钥仍只在 `.env` 本地填写）：
+
+```dotenv
+OPENAI_BASE_URL=https://api.deepseek.com
+OPENAI_MODEL=deepseek-flash
+LLM_PROTOCOL=json
+ENABLE_TRACING=false
+```
+
+没有配置模型或搜索密钥时仍可浏览已有数据；相应 AI/搜索操作会提示配置缺失。真实请求失败会保留错误状态，不返回 Mock 研究结论。
+
+## 初始化与运行
+
+终端一，从项目根目录执行：
 
 ```powershell
 .\scripts\start.ps1
 ```
 
-等价手动命令：
+脚本执行迁移、幂等种子初始化，并启动后端。手动等价步骤：
 
 ```powershell
 cd backend
 ..\.venv\Scripts\python.exe -m alembic upgrade head
 ..\.venv\Scripts\python.exe -m app.seed
+..\.venv\Scripts\python.exe -m app.company_seed
+..\.venv\Scripts\python.exe -m app.discovery_seed
 ..\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
@@ -68,76 +98,39 @@ cd frontend
 npm run dev
 ```
 
-打开 [Web 工作台](http://127.0.0.1:5173) 和 [OpenAPI](http://127.0.0.1:8000/docs)。Linux/macOS 使用 `.venv/bin/python`，先进入 backend 再运行相同 Python 模块命令。
+访问 [工作台](http://127.0.0.1:5173) 和 [API 文档](http://127.0.0.1:8000/docs)。初始种子不含已采集正文；新安装不会自动拥有开发机器中的事件、报告或数据库。修改配置后重启后端。已有数据库升级前自行备份，不要删除数据库来替代迁移。
 
-## 环境变量
+Docker 可通过根目录 `docker compose up --build` 启动，访问端口 8080；SQLite 使用命名卷。本次整理未执行 Docker 构建。
 
-根目录 `.env` 通过项目绝对路径定位，环境变量优先。后端仍建议在 backend 工作目录启动，保持相对数据库路径一致。
-
-| 变量 | 用途 |
-| --- | --- |
-| DATABASE_URL | 默认 `sqlite:///./insightflow.db` |
-| OPENAI_API_KEY | 可为空；为空仍可管理产品、抓取网页和导出证据汇编 |
-| OPENAI_MODEL | 默认 `gpt-4.1-mini`，可换为账户可用模型 |
-| OPENAI_BASE_URL | 留空使用官方端点 |
-| LLM_PROTOCOL | `responses` 官方默认；`chat` 使用 SDK Chat Completions；`json` 为仅 JSON 模式的兼容端点适配，仍进行 Pydantic 校验 |
-| ENABLE_TRACING | 默认 false；开启后 SDK Trace 会发送到 OpenAI，请自行审阅公开研究内容 |
-| GITHUB_TOKEN | 可选，仅发送到 GitHub API，重定向不转发 |
-
-兼容端点必须至少支持所选协议，无法保证所有供应商兼容。错误会写入任务状态，绝不替换为虚构结果。
-
-## 测试与评测
+## 测试
 
 ```powershell
 cd backend
 ..\.venv\Scripts\python.exe -m pytest -q
-cd ..
-.\.venv\Scripts\python.exe evals/run.py
-cd frontend
+cd ../frontend
+npm test
 npm run build
 ```
 
-测试不依赖公网或真实密钥。覆盖正文与噪声过滤、重复和回退快照、基线、功能增删、演示限定、缺失证据、冲突保留、恶意提示词、失败来源、API CRUD、SSRF 与 Schema。评测文件见 `evals/results.json`（本地生成）。Mock 仅用于测试，不进入真实研究数据库。真实模型准确率没有实际运行时为 null，不能用 Mock 成绩替代。
+后端测试使用本地 Fixture、临时数据库和 Mock Provider，不需要公网或真实密钥；前端规则测试同样离线。Mock 不写入正式研究库。评测可从根目录执行 `.\.venv\Scripts\python.exe evals/run.py`。
 
-实际采集探针（会访问公网并写入真实数据库）：
+`frontend/tests/workspace.e2e.mjs` 和 `scripts/accept_*.py` 等验收脚本是**显式联网**流程：需要运行中的服务、可用模型/搜索配置，可能收费且写入真实数据库，不属于普通离线测试。浏览器验收还需要本机 Edge。历史验收文档仅代表对应日期结果；本次实际测试与上传检查见 [GitHub 准备记录](docs/github-readiness.md)。
 
-```powershell
-cd backend
-..\.venv\Scripts\python.exe ../scripts/probe_sources.py
-```
+## 数据安全与 GitHub 上传
 
-## 完整演示流程
+- `.env`、密钥文件、数据库及日志、缓存、虚拟环境、构建和运行产物均应保持本地；模板只使用空密钥。
+- `.gitignore` 不能移除已经跟踪的文件，也不能清除历史对象。提交前运行 `.\.venv\Scripts\python.exe scripts/audit_repository.py`，该脚本输出位置和类别，不输出匹配值。
+- 维护者已确认公开展示，并接受历史中的5份真实运行 JSON。它们不含已发现的真实凭据；当前版本不再跟踪这些产物，历史仍完整保留。检查范围见 [准备记录](docs/github-readiness.md)。
+- 保留既有提交历史。不得通过重新初始化、强制推送或未确认的历史清理绕过检查。
 
-1. 运行迁移与 seed，然后启动两个服务。总览应显示三个产品，尚未采集时成功率为「—」。
-2. 在产品与数据源中查看或修改来源，开始研究；任务页查看进度、耗时和真实错误。
-3. 进入产品详情查看历史快照。第一次只建立基线，不显示虚假的变化。
-4. 无密钥时页面显示「未配置模型」。配置密钥后重启并再次研究，已有快照也可提取事实。
-5. 在产品详情或能力矩阵点击 Claim，查看原文、URL、观察时间、限定状态及完整快照。
-6. 再次采集相同内容，确认无重复快照或变化。真实网页变更后模型基于旧新快照分类，影响分析引用当前证据。
-7. 离线可控变化演示：运行 `pytest tests/test_core.py::test_mock_model_change_pipeline -v`。它验证旧新版本及去重，完全隔离于产品数据库。
-8. 选择至少两个产品，在对比页保存功能重叠、生态对标等关系。未知能力不会显示为不支持。
-9. 生成报告，查看九个章节、原始证据引用，复制或下载 Markdown。报告是确定性证据汇编；模型推断以已保存的影响分析单独标记。
+## 已知限制
 
-## Docker
+- 当前是本地可信用户、单实例工作台，没有完整多用户认证、授权及公网部署防护。服务应只绑定回环地址。
+- HTTP 采集不执行 JavaScript，不绕过登录、验证码、Cookie 或访问限制；动态正文、robots 和网络限制可能造成资料缺口。
+- 搜索结果必须取得正文和快照才能生成正式证据。没有结果表示当前资料不足，不能推断行业没有进展。
+- 原文匹配不证明企业声明为真，也不等于独立验证；演示、规划、试点、商业化和量产需要分别查看证据。
+- 事件关联和重要性是保守辅助规则，可能漏合或误判；分数不是真实性概率或商业估值。
+- 研究有工具与内容预算，不保证解答所有开放问题；不提供复杂 Multi-Agent、生产任务队列或自动定时发送。
+- 前端包体积、分页、动态来源覆盖和真实标注集仍有改进空间。
 
-```powershell
-Copy-Item .env.example .env  # 已存在时跳过，避免覆盖配置
-docker compose up --build
-```
-
-访问 [Docker Web](http://127.0.0.1:8080)。SQLite 使用命名卷。单实例、单 worker 运行，禁止扩展多副本共享进程内执行器。部署到公网前需要身份认证、授权、入口限流、出网策略和 HTTPS。
-
-## 交付与限制
-
-详细设计见 [架构](docs/architecture.md)、[API](docs/api.md)、[验证记录](docs/validation.md)。
-
-- MVP 面向本地可信用户，不含登录系统。不要直接绑定公网。
-- 自动化网页读取工具已确认三个初始 URL 可读；实际后端采集结果以来源状态为准，robots/网络限制不会被绕过。
-- 轻量 HTTP 不执行 JavaScript；正文不足会报告错误，请使用可访问的公开文档源。未启用 Crawl4AI。
-- 单进程工作流全局串行任务，最多两个并发 HTTP，2MB 上限、重试一次、每请求延迟至少 0.5s。严格遵守 robots，无法确认许可时不抓取。
-- 证据验证表示原文匹配，不能证明语义蕴含或厂商描述真实。页面包含限定词时保守拒绝“正式发布”验证；跨来源矛盾保留供人工复核。
-- Diff 只过滤空白、导航及显式更新时间行；复杂网页噪声仍需改进。无密钥时保留快照，不创建语义变化事件。
-- 变化前后截取文本交给模型，超长资料的细节可能漏检；单来源 300 秒、单模型调用最多 3 turn / 4000 输出 token。Token 统计来自成功响应，不含供应商可能计费的失败请求，不估算货币费用。
-- 当前 UI 各查询有条数上限（最多 200，报告/任务默认 50）；REST 支持 offset/limit，海量资料需增加前端翻页。
-- 不提供定时监控、任务取消和复杂队列。重启将未完成任务标记 interrupted，可手动重试。
-- 后续方向：动态页面适配、独立队列、多用户权限、冲突裁决与真实 LLM 标注集、分页 UI、报告对比。
+更多设计见 [架构](docs/architecture.md)、[API](docs/api.md)、[企业情报](docs/company-intelligence.md) 和 [覆盖扩展](docs/coverage-expansion.md)。
